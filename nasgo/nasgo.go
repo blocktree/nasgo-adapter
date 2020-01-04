@@ -16,7 +16,6 @@
 package nasgo
 
 import (
-	"github.com/assetsadapterstore/nasgo-adapter/rpc"
 	"github.com/astaxie/beego/config"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
@@ -47,22 +46,22 @@ func (wm *WalletManager) GetAddressDecode() openwallet.AddressDecoder {
 	return wm.Decoder
 }
 
-//TransactionDecoder 交易单解析器
-func (wm *WalletManager) GetTransactionDecoder() openwallet.TransactionDecoder {
-	return wm.TxDecoder
-}
+// //TransactionDecoder 交易单解析器
+// func (wm *WalletManager) GetTransactionDecoder() openwallet.TransactionDecoder {
+// 	return wm.TxDecoder
+// }
 
-//GetBlockScanner 获取区块链
-func (wm *WalletManager) GetBlockScanner() openwallet.BlockScanner {
-	return wm.Blockscanner
-}
+// //GetBlockScanner 获取区块链
+// func (wm *WalletManager) GetBlockScanner() openwallet.BlockScanner {
+// 	return wm.Blockscanner
+// }
 
 //LoadAssetsConfig 加载外部配置
 func (wm *WalletManager) LoadAssetsConfig(c config.Configer) error {
 
 	wm.Config.ServerAPI = c.String("serverAPI")
 	wm.Config.IsTestNet, _ = c.Bool("isTestNet")
-	wm.WalletClient = rpc.NewClient(wm.Config.ServerAPI)
+	// wm.WalletClient = rpc.NewClient(wm.Config.ServerAPI)
 	wm.Config.DataDir = c.String("dataDir")
 	wm.Config.FixFees = c.String("fixFees")
 
