@@ -16,27 +16,30 @@
 package nasgo
 
 import (
-	"encoding/hex"
-	"testing"
+	"path/filepath"
 
-	"github.com/assetsadapterstore/nasgo-adapter/addrdec"
+	"github.com/astaxie/beego/config"
 )
 
-func TestAddressDecoder_AddressEncode(t *testing.T) {
-	addrdec.Default.IsTestNet = false
+var (
+	tw *WalletManager
+)
 
-	p2pk, _ := hex.DecodeString("N6R2Gq5ZsXuMcXYcZo1bQ9WQRnaT9Ba3Ha")
-	p2pkAddr, _ := addrdec.Default.AddressEncode(p2pk)
-	t.Logf("p2pkAddr: %s", p2pkAddr)
+func init() {
 
+	tw = testNewWalletManager()
 }
 
-func TestAddressDecoder_AddressDecode(t *testing.T) {
+func testNewWalletManager() *WalletManager {
+	wm := NewWalletManager()
 
-	addrdec.Default.IsTestNet = false
-
-	p2pkAddr := "NuM54fm6siTZJVmBKbNizUxdwb3oy59Bnj"
-	p2pkHash, _ := addrdec.Default.AddressDecode(p2pkAddr)
-	t.Logf("p2pkHash: %s", hex.EncodeToString(p2pkHash))
-
+	//读取配置
+	absFile := filepath.Join("conf", "conf.ini")
+	//log.Debug("absFile:", absFile)
+	c, err := config.NewConfig("ini", absFile)
+	if err != nil {
+		return nil
+	}
+	wm.LoadAssetsConfig(c)
+	return wm
 }

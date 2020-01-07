@@ -12,6 +12,8 @@ import (
 var (
 	testApp        = "nasgo-adapter"
 	configFilePath = filepath.Join("conf")
+	dbFilePath     = filepath.Join("data", "db")
+	dbFileName     = "blockchain-NSG.db"
 )
 
 func testInitWalletManager() *openw.WalletManager {

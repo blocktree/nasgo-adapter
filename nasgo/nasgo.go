@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 The openwallet Authors
+ * Copyright 2020 The openwallet Authors
  * This file is part of the openwallet library.
  *
  * The openwallet library is free software: you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 package nasgo
 
 import (
+	"github.com/assetsadapterstore/nasgo-adapter/rpc"
 	"github.com/astaxie/beego/config"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
@@ -51,17 +52,17 @@ func (wm *WalletManager) GetAddressDecode() openwallet.AddressDecoder {
 // 	return wm.TxDecoder
 // }
 
-// //GetBlockScanner 获取区块链
-// func (wm *WalletManager) GetBlockScanner() openwallet.BlockScanner {
-// 	return wm.Blockscanner
-// }
+//GetBlockScanner 获取区块链
+func (wm *WalletManager) GetBlockScanner() openwallet.BlockScanner {
+	return wm.Blockscanner
+}
 
 //LoadAssetsConfig 加载外部配置
 func (wm *WalletManager) LoadAssetsConfig(c config.Configer) error {
 
 	wm.Config.ServerAPI = c.String("serverAPI")
 	wm.Config.IsTestNet, _ = c.Bool("isTestNet")
-	// wm.WalletClient = rpc.NewClient(wm.Config.ServerAPI)
+	wm.WalletClient = rpc.NewClient(wm.Config.ServerAPI)
 	wm.Config.DataDir = c.String("dataDir")
 	wm.Config.FixFees = c.String("fixFees")
 
@@ -82,5 +83,10 @@ func (wm *WalletManager) GetAssetsLogger() *log.OWLogger {
 
 //GetSmartContractDecoder 获取智能合约解析器
 func (wm *WalletManager) GetSmartContractDecoder() openwallet.SmartContractDecoder {
-	return nil
+	return wm.ContractDecoder
+}
+
+//BalanceModelType 余额模型类型
+func (wm *WalletManager) BalanceModelType() openwallet.BalanceModelType {
+	return openwallet.BalanceModelTypeAddress
 }
