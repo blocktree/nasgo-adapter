@@ -329,9 +329,17 @@ func (bs *BlockScanner) ExtractTransaction(blockHeight uint64, blockHash string,
 			extractData: make(map[string][]*openwallet.TxExtractData),
 			BlockTime:   blockTime,
 		}
+		err error
 	)
 
-	if trx.Type != 0 && trx.Type != 14 {
+	if trx.Type == 14 {
+		txid := trx.ID
+		trx, err = bs.wm.WalletClient.Tx.GetTransaction(txid)
+		if err != nil {
+			bs.wm.Log.Std.Debug("get asset transaction fail: [%v] ", txid)
+			return ExtractResult{Success: true}
+		}
+	} else if trx.Type != 0 {
 		bs.wm.Log.Std.Debug("does not support transaction type: [%v] ", trx.Type)
 		return ExtractResult{Success: true}
 	}
@@ -382,7 +390,23 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 	to := trx.RecipientId
 	coin := openwallet.Coin{
 		Symbol:     bs.wm.Symbol(),
-		IsContract: false,
+		IsContract: trx.Type == 14,
+	}
+
+	if trx.Type == 14 {
+		if trx.Asset == nil {
+			bs.wm.Log.Std.Debug("transaction asset info missing: [%v] ", trx.ID)
+			return
+		}
+		token := trx.Asset.Currency
+		contractID := openwallet.GenContractID(bs.wm.Symbol(), token)
+		coin.Contract = openwallet.SmartContract{
+			Symbol:     bs.wm.Symbol(),
+			ContractID: contractID,
+			Address:    token,
+			Decimals:   uint64(trx.Asset.Precision),
+		}
+		amount = trx.Asset.Amount
 	}
 
 	transx := &openwallet.Transaction{
@@ -401,7 +425,7 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 		TxType:      0,
 	}
 
-	transx.SetExtParam("message", trx.Message)
+	transx.SetExtParam("memo", trx.Message)
 
 	wxID := openwallet.GenTransactionWxID(transx)
 	transx.WxID = wxID
@@ -439,9 +463,9 @@ func (bs *BlockScanner) extractTxInput(trx *rpc.Transaction, txExtractData *open
 	txInput.Recharge.Symbol = coin.Symbol
 	txInput.Recharge.BlockHash = tx.BlockHash
 	txInput.Recharge.BlockHeight = tx.BlockHeight
-	txInput.Recharge.Index = 1 //地址模型填1
+	txInput.Recharge.Index = 0
 	txInput.Recharge.CreateAt = time.Now().Unix()
-	txInput.Recharge.TxType = 0
+	txInput.Recharge.TxType = tx.TxType
 	txExtractData.TxInputs = append(txExtractData.TxInputs, txInput)
 
 	if tx.TxType == 0 && trx.Fee > 0 {
@@ -451,7 +475,7 @@ func (bs *BlockScanner) extractTxInput(trx *rpc.Transaction, txExtractData *open
 		tmp := *txInput
 		feeCharge := &tmp
 		feeCharge.Amount = fee.String()
-		feeCharge.TxType = 0
+		feeCharge.TxType = tx.TxType
 		txExtractData.TxInputs = append(txExtractData.TxInputs, feeCharge)
 	}
 
@@ -474,7 +498,7 @@ func (bs *BlockScanner) extractTxOutput(trx *rpc.Transaction, txExtractData *ope
 	txOutput.Recharge.Symbol = coin.Symbol
 	txOutput.Recharge.BlockHash = tx.BlockHash
 	txOutput.Recharge.BlockHeight = tx.BlockHeight
-	txOutput.Recharge.Index = 1 //地址模型填1
+	txOutput.Recharge.Index = 0
 	txOutput.Recharge.CreateAt = time.Now().Unix()
 	txExtractData.TxOutputs = append(txExtractData.TxOutputs, txOutput)
 }
@@ -615,11 +639,14 @@ func (bs *BlockScanner) GetBalanceByAddress(address ...string) ([]*openwallet.Ba
 			bs.wm.Log.Errorf("get account[%v] token balance failed, err: %v", addr, err)
 		}
 
+		value := new(big.Int)
+		value.SetUint64(balance)
+
 		tokenBalance := &openwallet.Balance{
 			Address:          addr,
 			Symbol:           bs.wm.Symbol(),
-			Balance:          string(balance),
-			ConfirmBalance:   string(balance),
+			Balance:          value.String(),
+			ConfirmBalance:   value.String(),
 			UnconfirmBalance: "0",
 		}
 

@@ -22,7 +22,7 @@ type AssetsBalanceResponse struct {
 type AssetsBalance struct {
 	Currency  string `json:"currency"`
 	Balance   string `json:"balance"`
-	Precision uint32 `json:"precision"`
+	Precision uint8  `json:"precision"`
 }
 
 func newWalletClient(bk *BaseClient) *Wallet {

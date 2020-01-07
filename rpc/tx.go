@@ -37,6 +37,10 @@ type Transaction struct {
 }
 
 type Asset struct {
+	TransactionId string `json:"transactionId"`
+	Currency      string `json:"currency"`
+	Amount        string `json:"amount"`
+	Precision     uint8   `json:"precision"`
 }
 
 type Tx struct {
@@ -52,22 +56,22 @@ func newTxClient(bk *BaseClient) *Tx {
 func (tx *Tx) GetTransaction(id string) (*Transaction, error) {
 	resp, err := resty.
 		R().
-		Get(tx.bk.baseAddress + "/api/transactions/get?id=" + id)
+		Get(tx.bk.baseAddress + "/api/uia/transactions/get?id=" + id)
 	if err != nil {
 		return nil, errors.New(err)
 	}
 	body, err := tx.bk.ReadResponse(resp)
-	response := TxResponse{}
+	response := TxsResponse{}
 	if err := json.Unmarshal(body, &response); err != nil {
 		return nil, errors.New(err)
 	}
-	return response.Transaction, nil
+	return response.Transactions[0], nil
 }
 
 func (tx *Tx) GetTransactionsByBlock(blockId string) ([]*Transaction, error) {
 	resp, err := resty.
 		R().
-		Get(tx.bk.baseAddress + "/api/transactions?blockId=" + blockId)
+		Get(tx.bk.baseAddress + "/api/uia/transactions?blockId=" + blockId)
 	if err != nil {
 		return nil, errors.New(err)
 	}
