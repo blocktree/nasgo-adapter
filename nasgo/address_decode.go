@@ -66,17 +66,5 @@ func (decoder *AddressDecoder) RedeemScriptToAddress(pubs [][]byte, required uin
 
 //WIFToPrivateKey WIF转私钥
 func (decoder *AddressDecoder) WIFToPrivateKey(wif string, isTestnet bool) ([]byte, error) {
-
-	cfg := addrdec.NSG_mainnetPrivateWIFCompressed
-	if decoder.wm.Config.IsTestNet {
-		cfg = addrdec.NSG_testnetPrivateWIFCompressed
-	}
-
-	priv, err := addrdec.Default.AddressDecode(wif, cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	return priv, err
-
+	return nil, fmt.Errorf("WIFToPrivateKey is not supported")
 }
