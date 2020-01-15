@@ -3,9 +3,23 @@ package rpc
 import (
 	"encoding/json"
 
-	"github.com/assetsadapterstore/nasgo-adapter/crypto"
 	"github.com/go-errors/errors"
 	"gopkg.in/resty.v1"
+)
+
+const (
+	TxType_NSG            = 0  //	NSG Transactions
+	TxType_SetSecureCode  = 1  //Set secure code
+	TxType_Delegate       = 2  //Register as a delegator
+	TxType_Vote           = 3  //Submit a vote
+	TxType_MultiSig       = 4  //multisignature
+	TxType_PublishDAPP    = 5  //Publish a dapp in mainnet
+	TxType_DeopsitDAPP    = 6  //deposit to a Dapp
+	TxType_WithdrawalDAPP = 7  //withdrawal from a dapp
+	TxType_RegPublisher   = 9  //register as a asset publisher
+	TxType_RegAsset       = 10 //register an asset in mainnet
+	TxType_IssueAsset     = 13 //issue an asset
+	TxType_Asset          = 14 //asset transactions
 )
 
 type TxResponse struct {
@@ -40,7 +54,7 @@ type Asset struct {
 	TransactionId string `json:"transactionId"`
 	Currency      string `json:"currency"`
 	Amount        string `json:"amount"`
-	Precision     uint8   `json:"precision"`
+	Precision     uint8  `json:"precision"`
 }
 
 type Tx struct {
@@ -87,26 +101,7 @@ type TxPublishResponse struct {
 	Result string `json:"result"`
 }
 
-func (tx *Tx) TransferNSG(txData crypto.Tx) error {
-	resp, err := resty.
-		R().
-		SetBody(&txData).
-		Post(tx.bk.baseAddress + "/peer/transactions")
-	if err != nil {
-		return errors.New(err)
-	}
-	body, err := tx.bk.ReadResponse(resp)
-	if err != nil {
-		return err
-	}
-	response := TxPublishResponse{}
-	if err := json.Unmarshal(body, &response); err != nil {
-		return errors.New(err)
-	}
-	return nil
-}
-
-func (tx *Tx) TransferAsset(txData crypto.Tx) error {
+func (tx *Tx) Broadcast(txData interface{}) error {
 	resp, err := resty.
 		R().
 		SetBody(&txData).
