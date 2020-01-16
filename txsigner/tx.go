@@ -30,9 +30,7 @@ func (tx *Transaction) GenerateHash() (hash []byte) {
 		return
 	}
 
-	recipientId, _ := hex.DecodeString(tx.RecipientId)
-	message, _ := hex.DecodeString(tx.Message)
-	signature, _ := hex.DecodeString(tx.Signature)
+	// signature, _ := hex.DecodeString(tx.Signature)
 
 	assetSlices := make([][]byte, 0)
 	if tx.Type == rpc.TxType_Asset {
@@ -48,14 +46,14 @@ func (tx *Transaction) GenerateHash() (hash []byte) {
 	assetSlice := utils.ConcatByteArray(assetSlices)
 
 	txSlices := [][]byte{
-		utils.UInt32ToBytes(tx.Type),
-		utils.UInt64ToBytes(uint64(tx.Timestamp)),
+		utils.PutUInt32ToBytes(tx.Type),
+		utils.UInt32ToBytes(uint32(tx.Timestamp)),
 		tx.SenderPublicKey,
-		recipientId,
+		[]byte(tx.RecipientId),
 		utils.UInt64ToBytes(tx.Amount),
-		message,
+		[]byte(tx.Message),
 		assetSlice,
-		signature,
+		// signature,
 	}
 
 	msg := utils.ConcatByteArray(txSlices)

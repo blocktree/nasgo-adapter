@@ -98,7 +98,7 @@ func (tx *Tx) GetTransactionsByBlock(blockId string) ([]*Transaction, error) {
 }
 
 type TxPublishResponse struct {
-	Result string `json:"result"`
+	Result bool `json:"success"`
 }
 
 func (tx *Tx) Broadcast(txData interface{}) error {
@@ -120,7 +120,7 @@ func (tx *Tx) Broadcast(txData interface{}) error {
 		return err
 	}
 	response := TxPublishResponse{}
-	if err := json.Unmarshal(body, &response); err != nil {
+	if err := json.Unmarshal(body, &response); err != nil || !response.Result {
 		return errors.New(err)
 	}
 	return nil

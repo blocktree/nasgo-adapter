@@ -10,6 +10,13 @@ func ToJSON(obj interface{}) ([]byte, error) {
 	return json.Marshal(obj)
 }
 
+// PutUInt32ToBytes put uint32 to LittleEndian one byte
+func PutUInt32ToBytes(val uint32) []byte {
+	slice := make([]byte, 1)
+	slice[0] = byte(val)
+	return slice
+}
+
 // UInt32ToBytes convert uint32 to LittleEndian byte slice
 func UInt32ToBytes(val uint32) []byte {
 	slice := make([]byte, 4)
