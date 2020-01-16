@@ -19,7 +19,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/assetsadapterstore/nasgo-adapter/addrdec"
+	"github.com/blocktree/nasgo-adapter/addrdec"
 )
 
 func TestAddressDecoder_AddressEncode(t *testing.T) {
@@ -31,12 +31,12 @@ func TestAddressDecoder_AddressEncode(t *testing.T) {
 
 }
 
-func TestAddressDecoder_AddressDecode(t *testing.T) {
+// func TestAddressDecoder_AddressDecode(t *testing.T) {
 
-	addrdec.Default.IsTestNet = false
+// 	addrdec.Default.IsTestNet = false
 
-	p2pkAddr := "NuM54fm6siTZJVmBKbNizUxdwb3oy59Bnj"
-	p2pkHash, _ := addrdec.Default.AddressDecode(p2pkAddr)
-	t.Logf("p2pkHash: %s", hex.EncodeToString(p2pkHash))
+// 	p2pkAddr := "NuM54fm6siTZJVmBKbNizUxdwb3oy59Bnj"
+// 	p2pkHash, _ := addrdec.Default.AddressDecode(p2pkAddr)
+// 	t.Logf("p2pkHash: %s", hex.EncodeToString(p2pkHash))
 
-}
+// }

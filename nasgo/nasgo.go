@@ -16,8 +16,8 @@
 package nasgo
 
 import (
-	"github.com/assetsadapterstore/nasgo-adapter/rpc"
 	"github.com/astaxie/beego/config"
+	"github.com/blocktree/nasgo-adapter/rpc"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
 )
@@ -47,10 +47,10 @@ func (wm *WalletManager) GetAddressDecode() openwallet.AddressDecoder {
 	return wm.Decoder
 }
 
-// //TransactionDecoder 交易单解析器
-// func (wm *WalletManager) GetTransactionDecoder() openwallet.TransactionDecoder {
-// 	return wm.TxDecoder
-// }
+//TransactionDecoder 交易单解析器
+func (wm *WalletManager) GetTransactionDecoder() openwallet.TransactionDecoder {
+	return wm.TxDecoder
+}
 
 //GetBlockScanner 获取区块链
 func (wm *WalletManager) GetBlockScanner() openwallet.BlockScanner {

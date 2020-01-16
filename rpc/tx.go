@@ -102,9 +102,15 @@ type TxPublishResponse struct {
 }
 
 func (tx *Tx) Broadcast(txData interface{}) error {
+	b, err := json.Marshal(txData)
+	if err != nil {
+		return err
+	}
 	resp, err := resty.
 		R().
-		SetBody(&txData).
+		SetBody(b).
+		SetHeader("version", "''").
+		SetHeader("magic", "594fe0f3").
 		Post(tx.bk.baseAddress + "/peer/transactions")
 	if err != nil {
 		return errors.New(err)

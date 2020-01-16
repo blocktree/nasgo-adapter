@@ -21,7 +21,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/assetsadapterstore/nasgo-adapter/rpc"
+	"github.com/blocktree/nasgo-adapter/rpc"
 	"github.com/blocktree/openwallet/common"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"

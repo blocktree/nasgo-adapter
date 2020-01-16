@@ -18,7 +18,7 @@ package nasgo
 import (
 	"fmt"
 
-	"github.com/assetsadapterstore/nasgo-adapter/addrdec"
+	"github.com/blocktree/nasgo-adapter/addrdec"
 )
 
 type AddressDecoder struct {

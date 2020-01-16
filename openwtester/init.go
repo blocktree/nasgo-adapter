@@ -1,7 +1,7 @@
 package openwtester
 
 import (
-	"github.com/assetsadapterstore/nasgo-adapter/nasgo"
+	"github.com/blocktree/nasgo-adapter/nasgo"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openw"
 )
