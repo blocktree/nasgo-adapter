@@ -3,11 +3,10 @@ package txsigner
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/blocktree/openwallet/log"
-
 	"github.com/blocktree/go-owcrypt"
 	"github.com/blocktree/nasgo-adapter/rpc"
 	"github.com/blocktree/nasgo-adapter/utils"
+	"github.com/blocktree/openwallet/log"
 )
 
 type Transaction struct {

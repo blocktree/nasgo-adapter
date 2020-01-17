@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"reflect"
+	"fmt"
 	"testing"
 	"time"
 )
@@ -24,27 +24,37 @@ func TestGetEpochTime(t *testing.T) {
 	}
 }
 
-func TestGetTime(t *testing.T) {
-	type args struct {
-		t int64
-	}
-	ti, _ := time.Parse("2006-01-02 15:04 MST", "2020-01-14 13:56 UTC")
-	tests := []struct {
-		name string
-		args args
-		want time.Time
-	}{
-		{
-			name: "t",
-			args: args{t: 58787815},
-			want: ti,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := GetTime(tt.args.t); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("GetTime() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+//func TestGetTime(t *testing.T) {
+//	type args struct {
+//		t int64
+//	}
+//	ti, _ := time.Parse("2006-01-02 15:04 MST", "2020-01-14 13:56 UTC")
+//	tests := []struct {
+//		name string
+//		args args
+//		want time.Time
+//	}{
+//		{
+//			name: "t",
+//			args: args{t: 58787815},
+//			want: ti,
+//		},
+//	}
+//	for _, tt := range tests {
+//		t.Run(tt.name, func(t *testing.T) {
+//			if got := GetTime(tt.args.t); !reflect.DeepEqual(got, tt.want) {
+//				t.Errorf("GetTime() = %v, want %v", got, tt.want)
+//			}
+//		})
+//	}
+//}
+
+func TestBeginEpochTime(t *testing.T) {
+	fmt.Println(time.Now().Unix())
+	fmt.Println(beginEpochTime().Unix())
+//1520193600000
+//1517774400
+
+//1579245273891
+//1579245275
 }

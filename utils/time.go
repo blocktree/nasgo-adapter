@@ -1,26 +1,18 @@
 package utils
 
 import (
-	"fmt"
 	"time"
 )
 
 // GetEpochTime return the time span in seconds
 func GetEpochTime() int64 {
-	d := BeginEpochTime()
-	return int64(time.Since(d)) / 1000000
+	//d := beginEpochTime()
+	time := time.Now()
+	//return time.Unix() - d.Unix()
+	return time.Unix() - 1520193600
 }
 
-func GetTime(t int64) time.Time {
-	dur := time.Duration(t * 1000000)
-	d := BeginEpochTime()
-	return d.Add(dur)
-}
-
-func BeginEpochTime() time.Time {
-	var d, err = time.Parse("2006-01-02 15:04 MST", "2018-02-04 20:00 UTC")
-	if err != nil {
-		fmt.Errorf("%s", err)
-	}
+func beginEpochTime() time.Time {
+	d := time.Date(2018, 2, 4, 20, 0, 0, 0, time.UTC)
 	return d
 }

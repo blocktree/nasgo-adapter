@@ -510,10 +510,11 @@ func (decoder *TransactionDecoder) createNSGRawTransaction(
 		trx.Amount = uint64(amount.IntPart())
 		trx.Type = rpc.TxType_NSG
 	}
-	trx.Timestamp = utils.GetEpochTime()
+	trx.Timestamp = utils.GetEpochTime() - 5 //这5应该可以配置吧？
 	trx.SenderPublicKey = from.PublicKey
 	trx.RecipientId = to
 	trx.Message = rawTx.GetExtParam().Get("memo").String()
+	trx.Fee = uint64(fees.Shift(decoder.wm.Decimal()).IntPart())
 
 	//trx.ID = trx.GetID()
 	txBytes, err := json.Marshal(trx)
