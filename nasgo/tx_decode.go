@@ -58,8 +58,7 @@ func (decoder *TransactionDecoder) VerifyRawTransaction(wrapper openwallet.Walle
 
 // CreateSummaryRawTransactionWithError 创建汇总交易，返回能原始交易单数组（包含带错误的原始交易单）
 func (decoder *TransactionDecoder) CreateSummaryRawTransactionWithError(wrapper openwallet.WalletDAI, sumRawTx *openwallet.SummaryRawTransaction) ([]*openwallet.RawTransactionWithError, error) {
-	return nil, fmt.Errorf("do not support token transaction")
-	// return decoder.CreateNSGSummaryRawTransaction(wrapper, sumRawTx)
+	return decoder.CreateNSGSummaryRawTransaction(wrapper, sumRawTx)
 }
 
 //CreateSummaryRawTransaction 创建汇总交易，返回原始交易单数组
@@ -69,11 +68,7 @@ func (decoder *TransactionDecoder) CreateSummaryRawTransaction(wrapper openwalle
 		rawTxArray        = make([]*openwallet.RawTransaction, 0)
 		err               error
 	)
-	if sumRawTx.Coin.IsContract {
-		return nil, fmt.Errorf("do not support token transaction")
-	} else {
-		// rawTxWithErrArray, err = decoder.CreateNSGSummaryRawTransaction(wrapper, sumRawTx)
-	}
+	rawTxWithErrArray, err = decoder.CreateNSGSummaryRawTransaction(wrapper, sumRawTx)
 	if err != nil {
 		return nil, err
 	}
@@ -386,6 +381,20 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 		}
 	}
 
+	//取得费率
+	if len(sumRawTx.FeeRate) == 0 {
+		fixFees, err = decimal.NewFromString(decoder.wm.Config.FixFees)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		fixFees, _ = decimal.NewFromString(sumRawTx.FeeRate)
+	}
+	fixFees = fixFees.Shift(decoder.wm.Decimal())
+	if decimal.Zero.Equal(minTransfer) {
+		minTransfer = fixFees
+	}
+
 	for _, addrBalance := range addrBalanceArray {
 		decoder.wm.Log.Debugf("addrBalance: %+v", addrBalance)
 		//检查余额是否超过最低转账
@@ -400,19 +409,10 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 		return nil, nil
 	}
 
-	//取得费率
-	if len(sumRawTx.FeeRate) == 0 {
-		fixFees, err = decimal.NewFromString(decoder.wm.Config.FixFees)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		fixFees, _ = decimal.NewFromString(sumRawTx.FeeRate)
-	}
-
 	for _, addr := range sumAddresses {
 
 		sumAmount, _ := decimal.NewFromString(addr.Balance)
+		sumAmount = sumAmount.Sub(fixFees)
 		decoder.wm.Log.Debugf("fees: %v", fixFees)
 		decoder.wm.Log.Debugf("sumAmount: %v", sumAmount)
 
