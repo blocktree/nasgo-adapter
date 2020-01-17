@@ -98,7 +98,8 @@ func (tx *Tx) GetTransactionsByBlock(blockId string) ([]*Transaction, error) {
 }
 
 type TxPublishResponse struct {
-	Result bool `json:"success"`
+	Result bool   `json:"success"`
+	Error  string `json:"error"`
 }
 
 func (tx *Tx) Broadcast(txData interface{}) error {
@@ -109,6 +110,7 @@ func (tx *Tx) Broadcast(txData interface{}) error {
 	resp, err := resty.
 		R().
 		SetBody(b).
+		SetHeader("Content-Type", "application/json").
 		SetHeader("version", "''").
 		SetHeader("magic", "594fe0f3").
 		Post(tx.bk.baseAddress + "/peer/transactions")
@@ -121,6 +123,9 @@ func (tx *Tx) Broadcast(txData interface{}) error {
 	}
 	response := TxPublishResponse{}
 	if err := json.Unmarshal(body, &response); err != nil || !response.Result {
+		if len(response.Error) > 0 {
+			return errors.New(response.Error)
+		}
 		return errors.New(err)
 	}
 	return nil
