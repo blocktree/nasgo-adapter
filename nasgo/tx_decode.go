@@ -107,8 +107,7 @@ func (decoder *TransactionDecoder) SubmitRawTransaction(wrapper openwallet.Walle
 		"transaction": trx,
 	}
 
-	err = decoder.wm.WalletClient.Tx.BroadcastTx(param)
-	//err = decoder.wm.WalletClient.Tx.Broadcast(param)
+	err = decoder.wm.WalletClient.Tx.BroadcastTx(param, decoder.wm.Config.RpcRetry)
 	if err != nil {
 		return nil, err
 	}
@@ -347,7 +346,7 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 		target           = sumRawTx.SummaryAddress
 		fixFees          = decimal.New(0, 0)
 		precision        = int32(0)
-		pubkeyMap        = make(map[string]string)
+		addrMap          = make(map[string]*openwallet.Address)
 	)
 
 	addresses, err := wrapper.GetAddressList(sumRawTx.AddressStartIndex, sumRawTx.AddressLimit, "AccountID", sumRawTx.Account.AccountID)
@@ -362,7 +361,7 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 	searchAddrs := make([]string, 0)
 	for _, address := range addresses {
 		searchAddrs = append(searchAddrs, address.Address)
-		pubkeyMap[address.Address] = address.PublicKey
+		addrMap[address.Address] = address
 	}
 
 	if !sumRawTx.Coin.IsContract {
@@ -429,12 +428,8 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 			Required: 1,
 		}
 
-		from := &openwallet.Address{
-			Address:   addr.Address,
-			PublicKey: pubkeyMap[addr.Address],
-		}
-
-		createErr := decoder.createNSGRawTransaction(wrapper, rawTx, from, target, sumAmount, txAmount, fixFees)
+		from := addrMap[addr.Address]
+		createErr := decoder.createNSGRawTransaction(wrapper, rawTx, from, target, sumAmount, txAmount, fixFees.Shift(-decoder.wm.Decimal()))
 		rawTxWithErr := &openwallet.RawTransactionWithError{
 			RawTx: rawTx,
 			Error: openwallet.ConvertError(createErr),

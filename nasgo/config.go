@@ -63,6 +63,8 @@ type WalletConfig struct {
 	DataDir string
 	//固定手续费
 	FixFees string
+	//重试次数
+	RpcRetry int64
 }
 
 func NewConfig(symbol string) *WalletConfig {
@@ -85,6 +87,7 @@ func NewConfig(symbol string) *WalletConfig {
 	//最大的输入数量
 	c.MaxTxInputs = 50
 	c.FixFees = "0"
+	c.RpcRetry = 1
 
 	//创建目录
 	//file.MkdirAll(c.dbPath)

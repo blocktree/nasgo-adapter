@@ -93,8 +93,8 @@ func TestTx_BroadcastTx(t *testing.T) {
 		return
 	}
 
-	client := NewClient("http://47.56.133.119:20001")
-	err = client.Tx.BroadcastTx(tx)
+	client := NewClient("http://localhost:20001")
+	err = client.Tx.BroadcastTx(tx, 1)
 	if err != nil {
 		t.Errorf("json.Unmarshal error = %v", err)
 		return

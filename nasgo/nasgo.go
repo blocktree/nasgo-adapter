@@ -65,6 +65,7 @@ func (wm *WalletManager) LoadAssetsConfig(c config.Configer) error {
 	wm.WalletClient = rpc.NewClient(wm.Config.ServerAPI)
 	wm.Config.DataDir = c.String("dataDir")
 	wm.Config.FixFees = c.String("fixFees")
+	wm.Config.RpcRetry, _ = c.Int64("rpcRetry")
 
 	//数据文件夹
 	wm.Config.makeDataDir()
