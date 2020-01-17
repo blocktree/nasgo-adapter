@@ -340,146 +340,112 @@ func (decoder *TransactionDecoder) GetRawTransactionFeeRate() (feeRate string, u
 	return decoder.wm.Config.FixFees, "TX", nil
 }
 
-// //CreateNSGSummaryRawTransaction 创建汇总交易
-// func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwallet.WalletDAI, sumRawTx *openwallet.SummaryRawTransaction) ([]*openwallet.RawTransactionWithError, error) {
+//CreateNSGSummaryRawTransaction 创建汇总交易
+func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwallet.WalletDAI, sumRawTx *openwallet.SummaryRawTransaction) ([]*openwallet.RawTransactionWithError, error) {
 
-// 	var (
-// 		accountID          = sumRawTx.Account.AccountID
-// 		minTransfer, _     = decimal.NewFromString(sumRawTx.MinTransfer)
-// 		retainedBalance, _ = decimal.NewFromString(sumRawTx.RetainedBalance)
-// 		sumAddresses       = make([]string, 0)
-// 		rawTxArray         = make([]*openwallet.RawTransactionWithError, 0)
-// 		outputAddrs        map[string]decimal.Decimal
-// 		totalInputAmount   decimal.Decimal
-// 		sumUnspents        []*crypto.TransactionInputOutpoint
-// 		fixFees            = decimal.New(0, 0)
-// 	)
+	var (
+		accountID        = sumRawTx.Account.AccountID
+		minTransfer, _   = decimal.NewFromString(sumRawTx.MinTransfer)
+		addrBalanceArray = make([]*openwallet.Balance, 0)
+		sumAddresses     = make([]*openwallet.Balance, 0)
+		rawTxArray       = make([]*openwallet.RawTransactionWithError, 0)
+		target           = sumRawTx.SummaryAddress
+		fixFees          = decimal.New(0, 0)
+		precision        = int32(0)
+		pubkeyMap        = make(map[string]string)
+	)
 
-// 	if minTransfer.LessThan(retainedBalance) {
-// 		return nil, fmt.Errorf("mini transfer amount must be greater than address retained balance")
-// 	}
+	addresses, err := wrapper.GetAddressList(sumRawTx.AddressStartIndex, sumRawTx.AddressLimit, "AccountID", sumRawTx.Account.AccountID)
+	if err != nil {
+		return nil, err
+	}
 
-// 	address, err := wrapper.GetAddressList(sumRawTx.AddressStartIndex, sumRawTx.AddressLimit, "AccountID", sumRawTx.Account.AccountID)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	if len(addresses) == 0 {
+		return nil, fmt.Errorf("[%s] have not addresses", accountID)
+	}
 
-// 	if len(address) == 0 {
-// 		return nil, fmt.Errorf("[%s] have not addresses", accountID)
-// 	}
+	searchAddrs := make([]string, 0)
+	for _, address := range addresses {
+		searchAddrs = append(searchAddrs, address.Address)
+		pubkeyMap[address.Address] = address.PublicKey
+	}
 
-// 	searchAddrs := make([]string, 0)
-// 	for _, address := range address {
-// 		searchAddrs = append(searchAddrs, address.Address)
-// 	}
+	if !sumRawTx.Coin.IsContract {
+		addrBalanceArray, err = decoder.wm.Blockscanner.GetBalanceByAddress(searchAddrs...)
+		if err != nil {
+			return nil, err
+		}
+		precision = decoder.wm.Decimal()
+	} else {
+		for _, address := range searchAddrs {
+			balance, _ := decoder.wm.WalletClient.Wallet.GetAssetsBalance(address, sumRawTx.Coin.Contract.Address)
+			addrBalanceArray = append(addrBalanceArray, &openwallet.Balance{
+				Balance: balance.Balance,
+			})
+			precision = int32(balance.Precision)
+		}
+	}
 
-// 	addrBalanceArray, err := decoder.wm.Blockscanner.GetBalanceByAddress(searchAddrs...)
-// 	if err != nil {
-// 		return nil, err
-// 	}
+	for _, addrBalance := range addrBalanceArray {
+		decoder.wm.Log.Debugf("addrBalance: %+v", addrBalance)
+		//检查余额是否超过最低转账
+		addrBalanceDec, _ := decimal.NewFromString(addrBalance.Balance)
+		if addrBalanceDec.GreaterThanOrEqual(minTransfer) {
+			//添加到转账地址数组
+			sumAddresses = append(sumAddresses, addrBalance)
+		}
+	}
 
-// 	for _, addrBalance := range addrBalanceArray {
-// 		decoder.wm.Log.Debugf("addrBalance: %+v", addrBalance)
-// 		//检查余额是否超过最低转账
-// 		addrBalanceDec, _ := decimal.NewFromString(addrBalance.Balance)
-// 		if addrBalanceDec.GreaterThanOrEqual(minTransfer) {
-// 			//添加到转账地址数组
-// 			sumAddresses = append(sumAddresses, addrBalance.Address)
-// 		}
-// 	}
+	if len(sumAddresses) == 0 {
+		return nil, nil
+	}
 
-// 	if len(sumAddresses) == 0 {
-// 		return nil, nil
-// 	}
+	//取得费率
+	if len(sumRawTx.FeeRate) == 0 {
+		fixFees, err = decimal.NewFromString(decoder.wm.Config.FixFees)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		fixFees, _ = decimal.NewFromString(sumRawTx.FeeRate)
+	}
 
-// 	//取得费率
-// 	if len(sumRawTx.FeeRate) == 0 {
-// 		fixFees, err = decimal.NewFromString(decoder.wm.Config.FixFees)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 	} else {
-// 		fixFees, _ = decimal.NewFromString(sumRawTx.FeeRate)
-// 	}
+	for _, addr := range sumAddresses {
 
-// 	sumUnspents = make([]*crypto.TransactionInputOutpoint, 0)
-// 	outputAddrs = make(map[string]decimal.Decimal, 0)
-// 	totalInputAmount = decimal.Zero
+		sumAmount, _ := decimal.NewFromString(addr.Balance)
+		decoder.wm.Log.Debugf("fees: %v", fixFees)
+		decoder.wm.Log.Debugf("sumAmount: %v", sumAmount)
 
-// 	for i, addr := range sumAddresses {
+		//创建一笔交易单
+		rawTx := &openwallet.RawTransaction{
+			Coin:    sumRawTx.Coin,
+			Account: sumRawTx.Account,
+			FeeRate: sumRawTx.FeeRate,
+			To: map[string]string{
+				sumRawTx.SummaryAddress: sumAmount.StringFixed(precision),
+			},
+			Fees:     fixFees.StringFixed(precision),
+			Required: 1,
+		}
 
-// 		outputs, err := decoder.wm.WalletClient.Wallet.GetUnspent(addr)
-// 		if err != nil {
-// 			return nil, err
-// 		}
+		from := &openwallet.Address{
+			Address:   addr.Address,
+			PublicKey: pubkeyMap[addr.Address],
+		}
 
-// 		sumUnspents = append(sumUnspents, outputs...)
-// 		if retainedBalance.GreaterThan(decimal.Zero) {
-// 			outputAddrs = appendOutput(outputAddrs, addr, retainedBalance)
-// 		}
+		createErr := decoder.createNSGRawTransaction(wrapper, rawTx, from, target, sumAmount, fixFees)
+		rawTxWithErr := &openwallet.RawTransactionWithError{
+			RawTx: rawTx,
+			Error: openwallet.ConvertError(createErr),
+		}
 
-// 		//如果遍历地址完结，就可以进行构建交易单
-// 		if i == len(sumAddresses)-1 {
+		//创建成功，添加到队列
+		rawTxArray = append(rawTxArray, rawTxWithErr)
 
-// 			//计算这笔交易单的汇总数量
-// 			for _, u := range sumUnspents {
-// 				ua := common.IntToDecimals(int64(u.Value), decoder.wm.Decimal())
-// 				totalInputAmount = totalInputAmount.Add(ua)
-// 			}
+	}
 
-// 			/*
-
-// 				汇总数量计算：
-
-// 				1. 输入总数量 = 合计账户地址的所有utxo
-// 				2. 账户地址输出总数量 = 账户地址保留余额 * 地址数
-// 				3. 汇总数量 = 输入总数量 - 账户地址输出总数量 - 手续费
-// 			*/
-// 			retainedBalanceTotal := retainedBalance.Mul(decimal.New(int64(len(outputAddrs)), 0))
-// 			sumAmount := totalInputAmount.Sub(retainedBalanceTotal).Sub(fixFees)
-
-// 			decoder.wm.Log.Debugf("totalInputAmount: %v", totalInputAmount)
-// 			decoder.wm.Log.Debugf("retainedBalanceTotal: %v", retainedBalanceTotal)
-// 			decoder.wm.Log.Debugf("fees: %v", fixFees)
-// 			decoder.wm.Log.Debugf("sumAmount: %v", sumAmount)
-
-// 			//最后填充汇总地址及汇总数量
-// 			outputAddrs = appendOutput(outputAddrs, sumRawTx.SummaryAddress, sumAmount)
-
-// 			raxTxTo := make(map[string]string, 0)
-// 			for a, m := range outputAddrs {
-// 				raxTxTo[a] = m.StringFixed(decoder.wm.Decimal())
-// 			}
-
-// 			//创建一笔交易单
-// 			rawTx := &openwallet.RawTransaction{
-// 				Coin:     sumRawTx.Coin,
-// 				Account:  sumRawTx.Account,
-// 				FeeRate:  sumRawTx.FeeRate,
-// 				To:       raxTxTo,
-// 				Fees:     fixFees.StringFixed(decoder.wm.Decimal()),
-// 				Required: 1,
-// 			}
-
-// 			createErr := decoder.createNSGRawTransaction(wrapper, rawTx, sumUnspents, outputAddrs, "", fixFees)
-// 			rawTxWithErr := &openwallet.RawTransactionWithError{
-// 				RawTx: rawTx,
-// 				Error: openwallet.ConvertError(createErr),
-// 			}
-
-// 			//创建成功，添加到队列
-// 			rawTxArray = append(rawTxArray, rawTxWithErr)
-
-// 			//清空临时变量
-// 			sumUnspents = make([]*crypto.TransactionInputOutpoint, 0)
-// 			outputAddrs = make(map[string]decimal.Decimal, 0)
-// 			totalInputAmount = decimal.Zero
-
-// 		}
-// 	}
-
-// 	return rawTxArray, nil
-// }
+	return rawTxArray, nil
+}
 
 //createNSGRawTransaction 创建NSG原始交易单
 func (decoder *TransactionDecoder) createNSGRawTransaction(
