@@ -510,6 +510,7 @@ func (decoder *TransactionDecoder) createNSGRawTransaction(
 		trx.Amount = uint64(amount.IntPart())
 		trx.Type = rpc.TxType_NSG
 	}
+	trx.Fee = uint64(fees.Shift(decoder.wm.Decimal()).IntPart())
 	trx.Timestamp = utils.GetEpochTime()
 	trx.SenderPublicKey = from.PublicKey
 	trx.RecipientId = to
