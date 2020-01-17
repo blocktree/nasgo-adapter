@@ -468,9 +468,11 @@ func (decoder *TransactionDecoder) createNSGRawTransaction(
 
 	trx := &txsigner.Transaction{}
 	trx.Transaction = &rpc.Transaction{}
+	trx.Asset = &rpc.Asset{}
+	trx.Asset.UiaTransfer = &rpc.UiaTransfer{}
 	if rawTx.Coin.IsContract {
-		trx.Asset.Currency = rawTx.Coin.Contract.Address
-		trx.Asset.Amount = amount.String()
+		trx.Asset.UiaTransfer.Currency = rawTx.Coin.Contract.Address
+		trx.Asset.UiaTransfer.Amount = amount.String()
 		trx.Type = rpc.TxType_Asset
 	} else {
 		trx.Amount = uint64(amount.IntPart())

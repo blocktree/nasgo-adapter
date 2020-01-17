@@ -3,6 +3,7 @@ package txsigner
 import (
 	"encoding/hex"
 	"fmt"
+
 	"github.com/blocktree/go-owcrypt"
 	"github.com/blocktree/nasgo-adapter/rpc"
 	"github.com/blocktree/nasgo-adapter/utils"
@@ -30,16 +31,14 @@ func (tx *Transaction) GenerateHash(skipSignature bool) (hash []byte) {
 		return
 	}
 
-	// signature, _ := hex.DecodeString(tx.Signature)
-
 	assetSlices := make([][]byte, 0)
 	if tx.Type == rpc.TxType_Asset {
-		if tx.Asset == nil {
+		if tx.Asset == nil || tx.Asset.UiaTransfer == nil {
 			fmt.Errorf("transaction asset is empty")
 			return
 		}
-		cur, _ := hex.DecodeString(tx.Asset.Currency)
-		amt, _ := hex.DecodeString(tx.Asset.Amount)
+		cur, _ := hex.DecodeString(tx.Asset.UiaTransfer.Currency)
+		amt, _ := hex.DecodeString(tx.Asset.UiaTransfer.Amount)
 		assetSlices = append(assetSlices, cur)
 		assetSlices = append(assetSlices, amt)
 	}
@@ -55,7 +54,6 @@ func (tx *Transaction) GenerateHash(skipSignature bool) (hash []byte) {
 		utils.UInt64ToBytes(tx.Amount),
 		[]byte(tx.Message),
 		assetSlice,
-		// signature,
 	}
 
 	if !skipSignature && len(tx.Signature) > 0 {

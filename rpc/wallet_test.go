@@ -63,8 +63,8 @@ func TestWallet_GetAssetsBalance(t *testing.T) {
 			name:   "test assets balance",
 			fields: fields{baseAddress: Url},
 			args: args{
-				address:  "N2BxCH4EJqD2ACr4vto6nFQML25oZ5LE2g",
-				currency: "OBX.OBX",
+				address:  "NQ5jtKzK129w594w4hVh9v4WqbmCTAzkKA",
+				currency: "IMM.IMM",
 			},
 			want: &AssetsBalance{Currency: "OBX.OBX", Balance: "100000000",
 				Precision: 8},

@@ -128,7 +128,14 @@ func TestTransfer(t *testing.T) {
 
 	testGetAssetsAccountBalance(tm, walletID, accountID)
 
-	rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "0.012", "", nil)
+	// rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "0.012", "", nil)
+	rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "0.012", "", &openwallet.SmartContract{
+		Address:  "IMM.IMM",
+		Symbol:   "NSG",
+		Name:     "IMMT",
+		Token:    "IMMT",
+		Decimals: 4,
+	})
 	if err != nil {
 		return
 	}

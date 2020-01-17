@@ -56,10 +56,16 @@ type Transaction struct {
 }
 
 type Asset struct {
-	TransactionId string `json:"transactionId"`
-	Currency      string `json:"currency"`
-	Amount        string `json:"amount"`
-	Precision     uint8  `json:"precision"`
+	TransactionId string       `json:"transactionId,omitempty"`
+	Currency      string       `json:"currency,omitempty"`
+	Amount        string       `json:"amount,omitempty"`
+	Precision     uint8        `json:"precision,omitempty"`
+	UiaTransfer   *UiaTransfer `json:"uiaTransfer,omitempty"`
+}
+
+type UiaTransfer struct {
+	Currency string `json:"currency"`
+	Amount   string `json:"amount"`
 }
 
 type Tx struct {
