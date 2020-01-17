@@ -18,6 +18,7 @@ package nasgo
 import (
 	"fmt"
 
+	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
 )
 
@@ -67,6 +68,8 @@ func (bs *BlockScanner) SaveLocalBlock(blockHeader *Block) error {
 		Time:              uint64(blockHeader.Timestamp),
 		Symbol:            bs.wm.Symbol(),
 	}
+	log.Info("SaveLocalBlock Symbol:", bs.wm.Symbol())
+	log.Info("SaveLocalBlock:", header)
 
 	return bs.BlockchainDAI.SaveLocalBlockHead(header)
 }
