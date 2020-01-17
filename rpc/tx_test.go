@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	"encoding/json"
 	"reflect"
 	"testing"
 )
@@ -79,4 +80,24 @@ func TestTx_GetTransactions(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestTx_BroadcastTx(t *testing.T) {
+	rawTx := `
+{"transaction":{"type":0,"amount":123456,"fee":1000000,"recipientId":"NDt9qnAHnFAuP8T9GbzQ2o8UaacQscAcU2","message":"hello boy","timestamp":59049090,"asset":{},"senderPublicKey":"1a43612ad299bc749395ac164878044d3aee89cedc8fed7a08f13e3ad1b4fedc","signature":"1bb98abf922aae37175a980fcda371c1dcacb9aea5d82ae0903f4886b3d5a8423da0641872ea58407b8b47ca7ce3d82b2538791e127c6fc9534ed161e8b2a008","id":"edda385d1824b9f28d5f78dcd54c8e8d6004182de48b2302d892fb5adc427c88"}}
+`
+	var tx map[string]interface{}
+	err := json.Unmarshal([]byte(rawTx), &tx)
+	if err != nil {
+		t.Errorf("json.Unmarshal error = %v", err)
+		return
+	}
+
+	client := NewClient("http://47.56.133.119:20001")
+	err = client.Tx.BroadcastTx(tx)
+	if err != nil {
+		t.Errorf("json.Unmarshal error = %v", err)
+		return
+	}
+	//log.Infof("txid: %v", tx["id"])
 }

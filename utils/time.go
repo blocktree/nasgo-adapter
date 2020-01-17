@@ -6,16 +6,13 @@ import (
 
 // GetEpochTime return the time span in seconds
 func GetEpochTime() int64 {
-	d := BeginEpochTime()
-	return int64(time.Since(d)) / 1000000000
+	//d := beginEpochTime()
+	time := time.Now()
+	//return time.Unix() - d.Unix()
+	return time.Unix() - 1520193600
 }
 
-func GetTime(t int64) time.Time {
-	dur := time.Duration(t * 1000000000)
-	d := BeginEpochTime()
-	return d.Add(dur)
-}
-
-func BeginEpochTime() time.Time {
-	return time.Date(2018, time.February, 4, 20, 0, 0, 0, time.UTC)
+func beginEpochTime() time.Time {
+	d := time.Date(2018, 2, 4, 20, 0, 0, 0, time.UTC)
+	return d
 }

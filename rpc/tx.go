@@ -2,9 +2,11 @@ package rpc
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/blocktree/openwallet/log"
 	"github.com/imroc/req"
+	"github.com/tidwall/gjson"
 
 	"github.com/go-errors/errors"
 	"gopkg.in/resty.v1"
@@ -37,8 +39,8 @@ type TxsResponse struct {
 
 type Transaction struct {
 	ID            string   `json:"id"`
-	Height        string   `json:"height"`
-	BlockID       string   `json:"blockId"` // block id
+	Height        string   `json:"height,omitempty"`
+	BlockID       string   `json:"blockId,omitempty"` // block id
 	Type          uint32   `json:"type"`
 	Timestamp     int64    `json:"timestamp"` // A timestamp recording when this block was created (Will overflow in 2106[2])
 	SenderID      string   `json:"senderId"`
@@ -46,11 +48,11 @@ type Transaction struct {
 	Amount        uint64   `json:"amount"`
 	Fee           uint64   `json:"fee"`
 	Signature     string   `json:"signature"`
-	Signatures    []string `json:"signatures"`
-	SignSignature string   `json:"signSignature"`
-	Confirmations string   `json:"confirmations"`
+	Signatures    []string `json:"signatures,omitempty"`
+	SignSignature string   `json:"signSignature,omitempty"`
+	Confirmations string   `json:"confirmations,omitempty"`
 	Message       string   `json:"message"`
-	Asset         *Asset   `json:"asset"`
+	Asset         *Asset   `json:"asset,omitempty"`
 }
 
 type Asset struct {
@@ -106,6 +108,7 @@ type TxPublishResponse struct {
 }
 
 func (tx *Tx) Broadcast(txData interface{}) error {
+
 	b, err := json.Marshal(txData)
 	if err != nil {
 		return err
@@ -149,5 +152,9 @@ func (tx *Tx) BroadcastTx(txData interface{}) error {
 	}
 	log.Std.Info("%+v", r)
 	log.Debugf("response: %s", r.String())
+	resp := gjson.ParseBytes(r.Bytes())
+	if resp.Get("error").Exists() {
+		return fmt.Errorf(resp.Get("error").String())
+	}
 	return nil
 }

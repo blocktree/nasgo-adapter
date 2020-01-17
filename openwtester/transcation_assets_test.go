@@ -128,7 +128,7 @@ func TestTransfer(t *testing.T) {
 
 	testGetAssetsAccountBalance(tm, walletID, accountID)
 
-	rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "1.2", "", nil)
+	rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "0.012", "", nil)
 	if err != nil {
 		return
 	}

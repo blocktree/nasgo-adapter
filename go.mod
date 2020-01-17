@@ -12,7 +12,7 @@ require (
 	github.com/shiena/ansicolor v0.0.0-20151119151921-a422bbe96644 // indirect
 	github.com/shopspring/decimal v0.0.0-20191009025716-f1972eb1d1f5
 	github.com/stretchr/testify v1.4.0 // indirect
-	github.com/tidwall/gjson v1.3.4 // indirect
+	github.com/tidwall/gjson v1.3.4
 	gopkg.in/resty.v1 v1.12.0
 )
 
