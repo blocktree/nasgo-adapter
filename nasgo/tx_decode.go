@@ -232,7 +232,7 @@ func (decoder *TransactionDecoder) CreateNSGRawTransaction(wrapper openwallet.Wa
 	decoder.wm.Log.Std.Notice("Receive: %v", totalSend.String())
 	decoder.wm.Log.Std.Notice("-----------------------------------------------")
 
-	err = decoder.createNSGRawTransaction(wrapper, rawTx, from, target, totalSend.Shift(precision), fixFees)
+	err = decoder.createNSGRawTransaction(wrapper, rawTx, from, target, totalSend.Shift(precision), totalSend.String(), fixFees)
 	if err != nil {
 		return err
 	}
@@ -413,6 +413,7 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 
 		sumAmount, _ := decimal.NewFromString(addr.Balance)
 		sumAmount = sumAmount.Sub(fixFees)
+		txAmount := sumAmount.Shift(-precision).StringFixed(precision)
 		decoder.wm.Log.Debugf("fees: %v", fixFees)
 		decoder.wm.Log.Debugf("sumAmount: %v", sumAmount)
 
@@ -422,9 +423,9 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 			Account: sumRawTx.Account,
 			FeeRate: sumRawTx.FeeRate,
 			To: map[string]string{
-				sumRawTx.SummaryAddress: sumAmount.StringFixed(precision),
+				sumRawTx.SummaryAddress: txAmount,
 			},
-			Fees:     fixFees.StringFixed(precision),
+			Fees:     fixFees.Shift(-decoder.wm.Decimal()).StringFixed(decoder.wm.Decimal()),
 			Required: 1,
 		}
 
@@ -433,7 +434,7 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 			PublicKey: pubkeyMap[addr.Address],
 		}
 
-		createErr := decoder.createNSGRawTransaction(wrapper, rawTx, from, target, sumAmount, fixFees)
+		createErr := decoder.createNSGRawTransaction(wrapper, rawTx, from, target, sumAmount, txAmount, fixFees)
 		rawTxWithErr := &openwallet.RawTransactionWithError{
 			RawTx: rawTx,
 			Error: openwallet.ConvertError(createErr),
@@ -454,17 +455,13 @@ func (decoder *TransactionDecoder) createNSGRawTransaction(
 	from *openwallet.Address,
 	to string,
 	amount decimal.Decimal,
+	txAmount string,
 	fees decimal.Decimal,
 ) error {
-
-	var (
-		accountTotalSent = decimal.Zero
-	)
 
 	if len(to) == 0 {
 		return fmt.Errorf("Receiver addresses is empty! ")
 	}
-	accountTotalSent = accountTotalSent.Add(amount)
 
 	trx := &txsigner.Transaction{}
 	trx.Transaction = &rpc.Transaction{}
@@ -510,13 +507,9 @@ func (decoder *TransactionDecoder) createNSGRawTransaction(
 
 	keySigs = append(keySigs, &signature)
 
-	feesDec, _ := decimal.NewFromString(rawTx.Fees)
-	accountTotalSent = accountTotalSent.Add(feesDec)
-	accountTotalSent = decimal.Zero.Sub(accountTotalSent)
-
 	rawTx.Signatures[rawTx.Account.AccountID] = keySigs
 	rawTx.IsBuilt = true
-	rawTx.TxAmount = accountTotalSent.StringFixed(decoder.wm.Decimal())
+	rawTx.TxAmount = txAmount
 	rawTx.TxFrom = []string{from.Address}
 	rawTx.TxTo = []string{to}
 
