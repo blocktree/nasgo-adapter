@@ -37,8 +37,8 @@ func (tx *Transaction) GenerateHash(skipSignature bool) (hash []byte) {
 			fmt.Errorf("transaction asset is empty")
 			return
 		}
-		cur, _ := hex.DecodeString(tx.Asset.UiaTransfer.Currency)
-		amt, _ := hex.DecodeString(tx.Asset.UiaTransfer.Amount)
+		cur := []byte(tx.Asset.UiaTransfer.Currency)
+		amt := []byte(tx.Asset.UiaTransfer.Amount)
 		assetSlices = append(assetSlices, cur)
 		assetSlices = append(assetSlices, amt)
 	}
