@@ -24,12 +24,13 @@ type Block struct {
 	*rpc.Header
 }
 
-func (block *Block) BlockHeader() (header *openwallet.BlockHeader) {
+func (block *Block) BlockHeader(symbol string) (header *openwallet.BlockHeader) {
 	header = &openwallet.BlockHeader{}
 	header.Hash = block.ID
 	header.Version = uint64(block.Version)
 	header.Time = uint64(block.Timestamp)
 	header.Height = block.Height
 	header.Previousblockhash = block.PrevBlock
+	header.Symbol = symbol
 	return
 }

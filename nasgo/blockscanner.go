@@ -191,14 +191,14 @@ func (bs *BlockScanner) ScanBlockTask() {
 
 //newBlockNotify 获得新区块后，通知给观测者
 func (bs *BlockScanner) forkBlockNotify(block *Block) {
-	header := block.BlockHeader()
+	header := block.BlockHeader(bs.wm.Symbol())
 	header.Fork = true
 	bs.NewBlockNotify(header)
 }
 
 //newBlockNotify 获得新区块后，通知给观测者
 func (bs *BlockScanner) newBlockNotify(block *Block) {
-	header := block.BlockHeader()
+	header := block.BlockHeader(bs.wm.Symbol())
 	bs.NewBlockNotify(header)
 }
 
@@ -662,7 +662,7 @@ func (bs *BlockScanner) GetCurrentBlockHeader() (*openwallet.BlockHeader, error)
 		bs.wm.Log.Std.Info("get chain info error;unexpected error:%v", err)
 		return nil, err
 	}
-	return block.BlockHeader(), nil
+	return block.BlockHeader(bs.wm.Symbol()), nil
 }
 
 //rescanFailedRecord 重扫失败记录
