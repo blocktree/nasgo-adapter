@@ -2,6 +2,8 @@ package rpc
 
 import (
 	"encoding/json"
+	"github.com/blocktree/openwallet/log"
+	"github.com/imroc/req"
 
 	"github.com/go-errors/errors"
 	"gopkg.in/resty.v1"
@@ -107,6 +109,7 @@ func (tx *Tx) Broadcast(txData interface{}) error {
 	if err != nil {
 		return err
 	}
+	log.Debugf("Broadcast tx: %s", string(b))
 	resp, err := resty.
 		R().
 		SetBody(b).
@@ -128,5 +131,23 @@ func (tx *Tx) Broadcast(txData interface{}) error {
 		}
 		return errors.New(err)
 	}
+	return nil
+}
+
+
+func (tx *Tx) BroadcastTx(txData interface{}) error {
+
+	authHeader := req.Header{
+		"version": "''",
+		"magic": "594fe0f3",
+		"Content-Type":  "application/json",
+	}
+
+	r, err := req.Post(tx.bk.baseAddress + "/peer/transactions", req.BodyJSON(txData), authHeader)
+	if err != nil {
+		return errors.New(err)
+	}
+	log.Std.Info("%+v", r)
+	log.Debugf("response: %s", r.String())
 	return nil
 }

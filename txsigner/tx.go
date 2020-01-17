@@ -3,6 +3,7 @@ package txsigner
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/blocktree/openwallet/log"
 
 	"github.com/blocktree/go-owcrypt"
 	"github.com/blocktree/nasgo-adapter/rpc"
@@ -11,15 +12,15 @@ import (
 
 type Transaction struct {
 	*rpc.Transaction
-	SenderPublicKey []byte
+	SenderPublicKey string `json:"senderPublicKey"`
 }
 
 func (tx *Transaction) GetID() string {
-	hash := tx.GenerateHash()
+	hash := tx.GenerateHash(false)
 	return hex.EncodeToString(hash)
 }
 
-func (tx *Transaction) GenerateHash() (hash []byte) {
+func (tx *Transaction) GenerateHash(skipSignature bool) (hash []byte) {
 
 	if tx == nil {
 		fmt.Errorf("transaction is empty")
@@ -45,10 +46,12 @@ func (tx *Transaction) GenerateHash() (hash []byte) {
 	}
 	assetSlice := utils.ConcatByteArray(assetSlices)
 
+	pubBytes, _ := hex.DecodeString(tx.SenderPublicKey)
+
 	txSlices := [][]byte{
 		utils.PutUInt32ToBytes(tx.Type),
 		utils.UInt32ToBytes(uint32(tx.Timestamp)),
-		tx.SenderPublicKey,
+		pubBytes,
 		[]byte(tx.RecipientId),
 		utils.UInt64ToBytes(tx.Amount),
 		[]byte(tx.Message),
@@ -56,7 +59,13 @@ func (tx *Transaction) GenerateHash() (hash []byte) {
 		// signature,
 	}
 
+	if !skipSignature && len(tx.Signature) > 0 {
+		signature, _ := hex.DecodeString(tx.Signature)
+		txSlices = append(txSlices, signature)
+	}
+
 	msg := utils.ConcatByteArray(txSlices)
+	log.Debugf("tx msg: %s", hex.EncodeToString(msg))
 	hash = owcrypt.Hash(msg, 0, owcrypt.HASH_ALG_SHA256)
 	return
 }

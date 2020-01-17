@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/blocktree/openwallet/log"
 	"strconv"
 
 	"github.com/blocktree/go-owcrypt"
@@ -44,10 +45,11 @@ func (singer *TransactionSigner) VerifyAndCombineTransaction(emptyTrans string, 
 	}
 
 	trx.Signature = hex.EncodeToString(signature)
+	trx.ID = trx.GetID()
 	txBytes, err := json.Marshal(trx)
 	if err != nil {
 		return false, "", errors.New("Failed to marshal transaction")
 	}
-
+	log.Debugf("transaction json: %s", string(txBytes))
 	return true, hex.EncodeToString(txBytes), nil
 }
