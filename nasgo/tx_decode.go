@@ -374,6 +374,7 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 		for _, address := range searchAddrs {
 			balance, _ := decoder.wm.WalletClient.Wallet.GetAssetsBalance(address, sumRawTx.Coin.Contract.Address)
 			addrBalanceArray = append(addrBalanceArray, &openwallet.Balance{
+				Address: address,
 				Balance: balance.Balance,
 			})
 			precision = int32(balance.Precision)
@@ -390,7 +391,8 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 		fixFees, _ = decimal.NewFromString(sumRawTx.FeeRate)
 	}
 	fixFees = fixFees.Shift(decoder.wm.Decimal())
-	if decimal.Zero.Equal(minTransfer) {
+	minTransfer = minTransfer.Shift(decoder.wm.Decimal())
+	if !sumRawTx.Coin.IsContract && decimal.Zero.Equal(minTransfer) {
 		minTransfer = fixFees
 	}
 
@@ -411,7 +413,14 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 	for _, addr := range sumAddresses {
 
 		sumAmount, _ := decimal.NewFromString(addr.Balance)
-		sumAmount = sumAmount.Sub(fixFees)
+
+		if decimal.Zero.GreaterThanOrEqual(sumAmount) {
+			continue
+		}
+
+		if !sumRawTx.Coin.IsContract {
+			sumAmount = sumAmount.Sub(fixFees)
+		}
 		txAmount := sumAmount.Shift(-precision).StringFixed(precision)
 		decoder.wm.Log.Debugf("fees: %v", fixFees)
 		decoder.wm.Log.Debugf("sumAmount: %v", sumAmount)

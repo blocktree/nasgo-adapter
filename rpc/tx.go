@@ -3,6 +3,7 @@ package rpc
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"github.com/blocktree/openwallet/log"
 	"github.com/imroc/req"
@@ -167,6 +168,7 @@ func (tx *Tx) BroadcastTx(txData interface{}, try int64) error {
 			return nil
 		}
 		log.Std.Info("%+v", resp.Get("error").String())
+		time.Sleep(1 * time.Second)
 	}
 	return err
 }
