@@ -124,18 +124,20 @@ func TestTransfer(t *testing.T) {
 	tm := testInitWalletManager()
 	walletID := "W2DyYXbPCpkXWS1tJPYcRxhioSNyqwSu8F"
 	accountID := "9YBe43SkTyBneYNEnR7tHB3dh7VPB7toYkaZzU869C9y"
-	to := "NDt9qnAHnFAuP8T9GbzQ2o8UaacQscAcU2"
-
+	// to := "NDt9qnAHnFAuP8T9GbzQ2o8UaacQscAcU2"
+	//WMGcsvAwjjBj587oGE2GCZ3gu7F942hwGK
+	//EhXYgY4wFN91VzkmJtyXPa1mPwEcp7o7PokQqaKcKGE4
+	to := "N2MzN3J9ZhHiWdmKxGSCxbwRHgWN7FzPC3"
 	testGetAssetsAccountBalance(tm, walletID, accountID)
 
-	// rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "0.012", "", nil)
-	rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "0.012", "", &openwallet.SmartContract{
-		Address:  "IMM.IMM",
-		Symbol:   "NSG",
-		Name:     "IMMT",
-		Token:    "IMMT",
-		Decimals: 4,
-	})
+	rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "1.112", "", nil)
+	// rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "1.112", "", &openwallet.SmartContract{
+	// 	Address:  "IMM.IMM",
+	// 	Symbol:   "NSG",
+	// 	Name:     "IMMT",
+	// 	Token:    "IMMT",
+	// 	Decimals: 4,
+	// })
 	if err != nil {
 		return
 	}
@@ -159,9 +161,9 @@ func TestTransfer(t *testing.T) {
 
 func TestSummary(t *testing.T) {
 	tm := testInitWalletManager()
-	walletID := "WKFkmvsSFz5mC1cAX3edJC2e6hH6ow3X9E"
-	accountID := "4h4wnCmpzgy3ZTeoMHs3gjDCuWyXQcxDsk9dcwbNGhmR"
-	summaryAddress := "VLY5wrUfsjmKvTJGXEWwNpXQ6Wkzy8HU7Eb"
+	walletID := "WMGcsvAwjjBj587oGE2GCZ3gu7F942hwGK"
+	accountID := "EhXYgY4wFN91VzkmJtyXPa1mPwEcp7o7PokQqaKcKGE4"
+	summaryAddress := "NDt9qnAHnFAuP8T9GbzQ2o8UaacQscAcU2"
 
 	testGetAssetsAccountBalance(tm, walletID, accountID)
 
