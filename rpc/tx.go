@@ -97,7 +97,7 @@ func (tx *Tx) GetTransaction(id string) (*Transaction, error) {
 func (tx *Tx) GetTransactionsByBlock(blockId string) ([]*Transaction, error) {
 	resp, err := resty.
 		R().
-		Get(tx.bk.baseAddress + "/api/uia/transactions?blockId=" + blockId)
+		Get(tx.bk.baseAddress + "/api/transactions?blockId=" + blockId)
 	if err != nil {
 		return nil, errors.New(err)
 	}
