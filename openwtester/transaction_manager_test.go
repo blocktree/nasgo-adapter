@@ -116,6 +116,28 @@ func TestWalletManager_GetAssetsAccountBalance(t *testing.T) {
 	log.Info("balance:", balance)
 }
 
+
+func TestWalletManager_GetAssetsAccountTokenBalance(t *testing.T) {
+	tm := testInitWalletManager()
+	walletID := "W2DyYXbPCpkXWS1tJPYcRxhioSNyqwSu8F"
+	accountID := "9YBe43SkTyBneYNEnR7tHB3dh7VPB7toYkaZzU869C9y"
+
+	contract := openwallet.SmartContract{
+		Address:  "IMM.IMM",
+		Symbol:   "NSG",
+		Name:     "IMMT",
+		Token:    "IMMT",
+		Decimals: 5,
+	}
+
+	balance, err := tm.GetAssetsAccountTokenBalance(testApp, walletID, accountID, contract)
+	if err != nil {
+		log.Error("GetAssetsAccountTokenBalance failed, unexpected error:", err)
+		return
+	}
+	log.Info("balance:", balance.Balance)
+}
+
 func TestWalletManager_GetEstimateFeeRate(t *testing.T) {
 	tm := testInitWalletManager()
 	coin := openwallet.Coin{

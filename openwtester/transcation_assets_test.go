@@ -124,17 +124,17 @@ func TestTransfer(t *testing.T) {
 	tm := testInitWalletManager()
 	walletID := "W2DyYXbPCpkXWS1tJPYcRxhioSNyqwSu8F"
 	accountID := "9YBe43SkTyBneYNEnR7tHB3dh7VPB7toYkaZzU869C9y"
-	to := "NDt9qnAHnFAuP8T9GbzQ2o8UaacQscAcU2"
+	to := "N8ug35m3NeyKdtk7teojiWatdqt7pL7AWX"
 
 	testGetAssetsAccountBalance(tm, walletID, accountID)
 
 	// rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "0.012", "", nil)
-	rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "0.012", "", &openwallet.SmartContract{
+	rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "1", "", &openwallet.SmartContract{
 		Address:  "IMM.IMM",
 		Symbol:   "NSG",
 		Name:     "IMMT",
 		Token:    "IMMT",
-		Decimals: 4,
+		Decimals: 5,
 	})
 	if err != nil {
 		return
