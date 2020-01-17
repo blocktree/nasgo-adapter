@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"encoding/json"
+
 	"github.com/blocktree/openwallet/log"
 	"github.com/imroc/req"
 
@@ -134,16 +135,15 @@ func (tx *Tx) Broadcast(txData interface{}) error {
 	return nil
 }
 
-
 func (tx *Tx) BroadcastTx(txData interface{}) error {
 
 	authHeader := req.Header{
-		"version": "''",
-		"magic": "594fe0f3",
-		"Content-Type":  "application/json",
+		"version":      "''",
+		"magic":        "594fe0f3",
+		"Content-Type": "application/json",
 	}
 
-	r, err := req.Post(tx.bk.baseAddress + "/peer/transactions", req.BodyJSON(txData), authHeader)
+	r, err := req.Post(tx.bk.baseAddress+"/peer/transactions", req.BodyJSON(txData), authHeader)
 	if err != nil {
 		return errors.New(err)
 	}
