@@ -108,7 +108,12 @@ func (decoder *TransactionDecoder) SubmitRawTransaction(wrapper openwallet.Walle
 		return nil, openwallet.ConvertError(err)
 	}
 
-	err = decoder.wm.WalletClient.Tx.Broadcast(trx)
+	param := map[string]interface{}{
+		"transaction": trx,
+	}
+
+	err = decoder.wm.WalletClient.Tx.BroadcastTx(param)
+	//err = decoder.wm.WalletClient.Tx.Broadcast(param)
 	if err != nil {
 		return nil, err
 	}
@@ -308,6 +313,7 @@ func (decoder *TransactionDecoder) VerifyNSGRawTransaction(wrapper openwallet.Wa
 			signature, _ := hex.DecodeString(keySignature.Signature)
 			pubkey, _ := hex.DecodeString(keySignature.Address.PublicKey)
 
+			decoder.wm.Log.Debug("Message:", keySignature.Message)
 			decoder.wm.Log.Debug("Signature:", keySignature.Signature)
 			decoder.wm.Log.Debug("PublicKey:", keySignature.Address.PublicKey)
 
@@ -505,11 +511,11 @@ func (decoder *TransactionDecoder) createNSGRawTransaction(
 		trx.Type = rpc.TxType_NSG
 	}
 	trx.Timestamp = utils.GetEpochTime()
-	trx.SenderPublicKey, _ = hex.DecodeString(from.PublicKey)
+	trx.SenderPublicKey = from.PublicKey
 	trx.RecipientId = to
 	trx.Message = rawTx.GetExtParam().Get("memo").String()
 
-	trx.ID = trx.GetID()
+	//trx.ID = trx.GetID()
 	txBytes, err := json.Marshal(trx)
 	if err != nil {
 		return openwallet.Errorf(openwallet.ErrCreateRawTransactionFailed, "Failed to marshal transaction: %s", err)
@@ -521,7 +527,7 @@ func (decoder *TransactionDecoder) createNSGRawTransaction(
 	}
 	//装配签名
 	keySigs := make([]*openwallet.KeySignature, 0)
-	trxHash := trx.GenerateHash()
+	trxHash := trx.GenerateHash(true)
 	beSignHex := hex.EncodeToString(trxHash)
 
 	decoder.wm.Log.Std.Debug("txHash: %s", beSignHex)
