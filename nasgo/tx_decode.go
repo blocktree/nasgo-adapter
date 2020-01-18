@@ -402,6 +402,8 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 			if len(feesAddresses) == 0 {
 				return nil, openwallet.Errorf(openwallet.ErrAccountNotAddress, "fees support account have not addresses")
 			}
+		} else {
+			return nil, openwallet.Errorf(openwallet.ErrAccountNotAddress, "fees support account have not config")
 		}
 	}
 
