@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/blocktree/nasgo-adapter/rpc"
-	"github.com/blocktree/openwallet/common"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
 	"github.com/shopspring/decimal"
@@ -333,7 +332,7 @@ func (bs *BlockScanner) ExtractTransaction(blockHeight uint64, blockHash string,
 		err error
 	)
 
-	if trx.Type == 14 {
+	if trx.Type == rpc.TxType_Asset {
 		txid := trx.ID
 		trx, err = bs.wm.WalletClient.Tx.GetTransaction(txid)
 		if err != nil {
@@ -386,15 +385,15 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 
 	status := "1"
 	reason := ""
-	amount := common.NewString(trx.Amount).String()
+	amount := decimal.New(int64(trx.Amount), -bs.wm.Decimal()).String()
 	from := trx.SenderID
 	to := trx.RecipientId
 	coin := openwallet.Coin{
 		Symbol:     bs.wm.Symbol(),
-		IsContract: trx.Type == 14,
+		IsContract: trx.Type == rpc.TxType_Asset,
 	}
 
-	if trx.Type == 14 {
+	if trx.Type == rpc.TxType_Asset {
 		if trx.Asset == nil || trx.Asset.UiaTransfer == nil {
 			bs.wm.Log.Std.Debug("transaction asset info missing: [%v] ", trx.ID)
 			return
@@ -408,11 +407,43 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 			Decimals:   uint64(trx.Asset.UiaTransfer.Precision),
 		}
 		amount = trx.Asset.UiaTransfer.Amount
+
+		if optType == 0 || optType == 1 {
+			fees := decimal.New(int64(trx.Fee), -bs.wm.Decimal()).String()
+			feeExtractData := &openwallet.TxExtractData{}
+			feeTransx := &openwallet.Transaction{
+				Coin:        coin,
+				Fees:        fees,
+				BlockHash:   result.BlockHash,
+				BlockHeight: result.BlockHeight,
+				TxID:        result.TxID,
+				Amount:      "0",
+				ConfirmTime: result.BlockTime,
+				From:        []string{from + ":" + amount},
+				IsMemo:      false,
+				Status:      status,
+				Reason:      reason,
+				TxType:      0,
+			}
+
+			wxID := openwallet.GenTransactionWxID2(trx.ID, bs.wm.Symbol(), "")
+			feeTransx.WxID = wxID
+			feeExtractData.Transaction = feeTransx
+			bs.extractTxInput(trx, txExtractData)
+
+			fee := new(big.Int)
+			fee.SetUint64(trx.Fee)
+			feeCharge := &openwallet.TxInput{}
+			feeCharge.Amount = fees
+			feeCharge.TxType = feeTransx.TxType
+			txExtractData.TxInputs = append(txExtractData.TxInputs, feeCharge)
+
+			txExtractDataArray = append(txExtractDataArray, txExtractData)
+		}
 	}
 
 	transx := &openwallet.Transaction{
 		Coin:        coin,
-		Fees:        common.NewString(trx.Fee).String(),
 		BlockHash:   result.BlockHash,
 		BlockHeight: result.BlockHeight,
 		TxID:        result.TxID,
@@ -424,6 +455,9 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 		Status:      status,
 		Reason:      reason,
 		TxType:      0,
+	}
+	if trx.Type == rpc.TxType_NSG {
+		transx.Fees = decimal.New(int64(trx.Fee), -bs.wm.Decimal()).String()
 	}
 
 	transx.SetExtParam("memo", trx.Message)
@@ -469,7 +503,7 @@ func (bs *BlockScanner) extractTxInput(trx *rpc.Transaction, txExtractData *open
 	txInput.Recharge.TxType = tx.TxType
 	txExtractData.TxInputs = append(txExtractData.TxInputs, txInput)
 
-	if tx.TxType == 0 && trx.Fee > 0 {
+	if trx.Fee > 0 {
 		//手续费也作为一个输出s
 		fee := new(big.Int)
 		fee.SetUint64(trx.Fee)
