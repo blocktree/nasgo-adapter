@@ -49,6 +49,7 @@ func (decoder *ContractDecoder) GetTokenBalanceByAddress(contract openwallet.Sma
 		}
 
 		value, _ := decimal.NewFromString(balance.Balance)
+		value = value.Shift(-int32(contract.Decimals))
 		// value = value.Shift(-int32(balance.Precision))
 
 		tokenBalance := &openwallet.TokenBalance{
