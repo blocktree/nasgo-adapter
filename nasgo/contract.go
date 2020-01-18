@@ -17,6 +17,7 @@ package nasgo
 
 import (
 	"github.com/blocktree/openwallet/openwallet"
+	"github.com/shopspring/decimal"
 )
 
 type ContractDecoder struct {
@@ -47,13 +48,16 @@ func (decoder *ContractDecoder) GetTokenBalanceByAddress(contract openwallet.Sma
 			return nil, err
 		}
 
+		value, _ := decimal.NewFromString(balance.Balance)
+		value = value.Shift(-int32(balance.Precision))
+
 		tokenBalance := &openwallet.TokenBalance{
 			Contract: &contract,
 			Balance: &openwallet.Balance{
 				Address:          addr,
 				Symbol:           contract.Symbol,
-				Balance:          balance.Balance,
-				ConfirmBalance:   balance.Balance,
+				Balance:          value.String(),
+				ConfirmBalance:   value.String(),
 				UnconfirmBalance: "0",
 			},
 		}

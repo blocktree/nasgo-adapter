@@ -25,6 +25,7 @@ import (
 	"github.com/blocktree/openwallet/common"
 	"github.com/blocktree/openwallet/log"
 	"github.com/blocktree/openwallet/openwallet"
+	"github.com/shopspring/decimal"
 )
 
 const (
@@ -639,8 +640,7 @@ func (bs *BlockScanner) GetBalanceByAddress(address ...string) ([]*openwallet.Ba
 			bs.wm.Log.Errorf("get account[%v] token balance failed, err: %v", addr, err)
 		}
 
-		value := new(big.Int)
-		value.SetUint64(balance)
+		value := decimal.New(int64(balance), -bs.wm.Decimal())
 
 		tokenBalance := &openwallet.Balance{
 			Address:          addr,
