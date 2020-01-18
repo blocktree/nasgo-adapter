@@ -499,7 +499,7 @@ func (bs *BlockScanner) extractTxInput(trx *rpc.Transaction, txExtractData *open
 	txInput.Recharge.TxType = tx.TxType
 	txExtractData.TxInputs = append(txExtractData.TxInputs, txInput)
 
-	if trx.Fee > 0 {
+	if trx.Type == rpc.TxType_NSG && trx.Fee > 0 {
 		//手续费也作为一个输出s
 		fees := decimal.New(int64(trx.Fee), -bs.wm.Decimal()).String()
 		tmp := *txInput
