@@ -411,7 +411,6 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 			fees := decimal.New(int64(trx.Fee), -bs.wm.Decimal()).String()
 			feeExtractData := &openwallet.TxExtractData{}
 			feeTransx := &openwallet.Transaction{
-				Coin:        coin,
 				Fees:        fees,
 				BlockHash:   result.BlockHash,
 				BlockHeight: result.BlockHeight,
@@ -419,10 +418,11 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 				Amount:      "0",
 				ConfirmTime: result.BlockTime,
 				From:        []string{from + ":" + amount},
+				To:          []string{"'' :" + amount},
 				IsMemo:      false,
 				Status:      status,
 				Reason:      reason,
-				TxType:      0,
+				TxType:      1,
 			}
 
 			wxID := openwallet.GenTransactionWxID(feeTransx)
@@ -443,6 +443,7 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 		BlockHash:   result.BlockHash,
 		BlockHeight: result.BlockHeight,
 		TxID:        result.TxID,
+		Fees:        "0",
 		Amount:      amount,
 		ConfirmTime: result.BlockTime,
 		From:        []string{from + ":" + amount},
