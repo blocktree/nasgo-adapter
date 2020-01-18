@@ -326,7 +326,7 @@ func (bs *BlockScanner) ExtractTransaction(blockHeight uint64, blockHash string,
 			BlockHeight: blockHeight,
 			TxID:        trx.ID,
 			extractData: make(map[string][]*openwallet.TxExtractData),
-			BlockTime:   blockTime,
+			BlockTime:   time.Now().Unix(),
 		}
 		err error
 	)
@@ -408,18 +408,26 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 		amount = trx.Asset.UiaTransfer.Amount
 
 		if optType == 0 || optType == 1 {
+
+			mainAmount := decimal.New(int64(trx.Amount), -bs.wm.Decimal()).String()
+			mainCoin := openwallet.Coin{
+				IsContract:false,
+				Symbol:bs.wm.Symbol(),
+			}
+
 			fees := decimal.New(int64(trx.Fee), -bs.wm.Decimal()).String()
 			feeExtractData := &openwallet.TxExtractData{}
 			feeTransx := &openwallet.Transaction{
+				Coin: mainCoin,
 				Fees:        fees,
 				BlockHash:   result.BlockHash,
 				BlockHeight: result.BlockHeight,
 				TxID:        result.TxID,
 				Amount:      "0",
 				ConfirmTime: result.BlockTime,
-				From:        []string{from + ":" + fees},
-				To:          []string{":"},
-				IsMemo:      false,
+				From:        []string{from + ":" + mainAmount},
+				To:          []string{to + ":" + mainAmount},
+				IsMemo:      true,
 				Status:      status,
 				Reason:      reason,
 				TxType:      1,
@@ -432,6 +440,15 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 			feeCharge := &openwallet.TxInput{}
 			feeCharge.Amount = fees
 			feeCharge.TxType = feeTransx.TxType
+			feeCharge.Sid = openwallet.GenTxInputSID(result.TxID, bs.wm.Symbol(), "", uint64(0))
+			feeCharge.TxID = result.TxID
+			feeCharge.Address = from
+			feeCharge.Coin = mainCoin
+			feeCharge.Symbol = mainCoin.Symbol
+			feeCharge.BlockHash = result.BlockHash
+			feeCharge.BlockHeight = result.BlockHeight
+			feeCharge.Index = 0
+			feeCharge.CreateAt = time.Now().Unix()
 			feeExtractData.TxInputs = append(feeExtractData.TxInputs, feeCharge)
 
 			txExtractDataArray = append(txExtractDataArray, feeExtractData)
@@ -507,6 +524,8 @@ func (bs *BlockScanner) extractTxInput(trx *rpc.Transaction, txExtractData *open
 		feeCharge := &tmp
 		feeCharge.Amount = fees
 		feeCharge.TxType = tx.TxType
+		feeCharge.Sid = openwallet.GenTxInputSID(tx.TxID, bs.wm.Symbol(), coin.ContractID, uint64(1))
+		feeCharge.Index = 1
 		txExtractData.TxInputs = append(txExtractData.TxInputs, feeCharge)
 	}
 
