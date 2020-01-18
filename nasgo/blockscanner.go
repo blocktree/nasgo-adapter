@@ -17,7 +17,6 @@ package nasgo
 
 import (
 	"fmt"
-	"math/big"
 	"strconv"
 	"time"
 
@@ -431,8 +430,6 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 			feeExtractData.Transaction = feeTransx
 			bs.extractTxInput(trx, txExtractData)
 
-			fee := new(big.Int)
-			fee.SetUint64(trx.Fee)
 			feeCharge := &openwallet.TxInput{}
 			feeCharge.Amount = fees
 			feeCharge.TxType = feeTransx.TxType
@@ -505,11 +502,10 @@ func (bs *BlockScanner) extractTxInput(trx *rpc.Transaction, txExtractData *open
 
 	if trx.Fee > 0 {
 		//手续费也作为一个输出s
-		fee := new(big.Int)
-		fee.SetUint64(trx.Fee)
+		fees := decimal.New(int64(trx.Fee), -bs.wm.Decimal()).String()
 		tmp := *txInput
 		feeCharge := &tmp
-		feeCharge.Amount = fee.String()
+		feeCharge.Amount = fees
 		feeCharge.TxType = tx.TxType
 		txExtractData.TxInputs = append(txExtractData.TxInputs, feeCharge)
 	}
