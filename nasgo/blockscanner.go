@@ -428,14 +428,13 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 			wxID := openwallet.GenTransactionWxID(feeTransx)
 			feeTransx.WxID = wxID
 			feeExtractData.Transaction = feeTransx
-			bs.extractTxInput(trx, txExtractData)
 
 			feeCharge := &openwallet.TxInput{}
 			feeCharge.Amount = fees
 			feeCharge.TxType = feeTransx.TxType
-			txExtractData.TxInputs = append(txExtractData.TxInputs, feeCharge)
+			feeExtractData.TxInputs = append(feeExtractData.TxInputs, feeCharge)
 
-			txExtractDataArray = append(txExtractDataArray, txExtractData)
+			txExtractDataArray = append(txExtractDataArray, feeExtractData)
 		}
 	}
 
