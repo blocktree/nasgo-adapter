@@ -127,17 +127,18 @@ func TestTransfer(t *testing.T) {
 	// to := "NDt9qnAHnFAuP8T9GbzQ2o8UaacQscAcU2"
 	//WMGcsvAwjjBj587oGE2GCZ3gu7F942hwGK
 	//EhXYgY4wFN91VzkmJtyXPa1mPwEcp7o7PokQqaKcKGE4
-	to := "N2MzN3J9ZhHiWdmKxGSCxbwRHgWN7FzPC3"
+	// to := "N2MzN3J9ZhHiWdmKxGSCxbwRHgWN7FzPC3"
+	to := "NGUdbPy5WkerRcqkMUneq7R4U5LZ4HvnEi"
 	testGetAssetsAccountBalance(tm, walletID, accountID)
 
-	rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "1.112", "", nil)
-	// rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "1.112", "", &openwallet.SmartContract{
-	// 	Address:  "IMM.IMM",
-	// 	Symbol:   "NSG",
-	// 	Name:     "IMMT",
-	// 	Token:    "IMMT",
-	// 	Decimals: 4,
-	// })
+	// rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "10", "", nil)
+	rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "100", "", &openwallet.SmartContract{
+		Address:  "IMM.IMM",
+		Symbol:   "NSG",
+		Name:     "IMMT",
+		Token:    "IMMT",
+		Decimals: 5,
+	})
 	if err != nil {
 		return
 	}
@@ -167,9 +168,18 @@ func TestSummary(t *testing.T) {
 
 	testGetAssetsAccountBalance(tm, walletID, accountID)
 
+	// contract := &openwallet.SmartContract{
+	// 	Address:  "IMM.IMM",
+	// 	Symbol:   "NSG",
+	// 	Name:     "IMMT",
+	// 	Token:    "IMMT",
+	// 	Decimals: 5,
+	// }
+
 	rawTxArray, err := testCreateSummaryTransactionStep(tm, walletID, accountID,
 		summaryAddress, "", "", "",
 		0, 100, nil, nil)
+	// 0, 100, contract, nil)
 	if err != nil {
 		log.Errorf("CreateSummaryTransaction failed, unexpected error: %v", err)
 		return
