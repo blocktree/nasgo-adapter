@@ -338,15 +338,17 @@ func (decoder *TransactionDecoder) GetRawTransactionFeeRate() (feeRate string, u
 func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwallet.WalletDAI, sumRawTx *openwallet.SummaryRawTransaction) ([]*openwallet.RawTransactionWithError, error) {
 
 	var (
-		accountID        = sumRawTx.Account.AccountID
-		minTransfer, _   = decimal.NewFromString(sumRawTx.MinTransfer)
-		addrBalanceArray = make([]*openwallet.Balance, 0)
-		sumAddresses     = make([]*openwallet.Balance, 0)
-		rawTxArray       = make([]*openwallet.RawTransactionWithError, 0)
-		target           = sumRawTx.SummaryAddress
-		fixFees          = decimal.New(0, 0)
-		precision        = int32(0)
-		addrMap          = make(map[string]*openwallet.Address)
+		accountID          = sumRawTx.Account.AccountID
+		minTransfer, _     = decimal.NewFromString(sumRawTx.MinTransfer)
+		addrBalanceArray   = make([]*openwallet.Balance, 0)
+		sumAddresses       = make([]*openwallet.Balance, 0)
+		rawTxArray         = make([]*openwallet.RawTransactionWithError, 0)
+		target             = sumRawTx.SummaryAddress
+		fixFees            = decimal.New(0, 0)
+		precision          = int32(0)
+		addrMap            = make(map[string]*openwallet.Address)
+		feesSupportAccount *openwallet.AssetsAccount
+		feesAddresses      []*openwallet.Address
 	)
 
 	addresses, err := wrapper.GetAddressList(sumRawTx.AddressStartIndex, sumRawTx.AddressLimit, "AccountID", sumRawTx.Account.AccountID)
@@ -371,6 +373,8 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 		}
 		precision = decoder.wm.Decimal()
 	} else {
+		// 代币转账
+
 		for _, address := range searchAddrs {
 			balance, _ := decoder.wm.WalletClient.Wallet.GetAssetsBalance(address, sumRawTx.Coin.Contract.Address)
 			addrBalanceArray = append(addrBalanceArray, &openwallet.Balance{
@@ -378,6 +382,26 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 				Balance: balance.Balance,
 			})
 			precision = int32(balance.Precision)
+		}
+
+		// 如果有提供手续费账户，检查账户是否存在
+		if feesAcount := sumRawTx.FeesSupportAccount; feesAcount != nil {
+			account, supportErr := wrapper.GetAssetsAccountInfo(feesAcount.AccountID)
+			if supportErr != nil {
+				return nil, openwallet.Errorf(openwallet.ErrAccountNotFound, "can not find fees support account")
+			}
+			feesSupportAccount = account
+
+			//获取手续费支持账户的地址nonce
+			feesAddresses, feesSupportErr := wrapper.GetAddressList(0, 1,
+				"AccountID", feesSupportAccount.AccountID)
+			if feesSupportErr != nil {
+				return nil, openwallet.NewError(openwallet.ErrAddressNotFound, "fees support account have not addresses")
+			}
+
+			if len(feesAddresses) == 0 {
+				return nil, openwallet.Errorf(openwallet.ErrAccountNotAddress, "fees support account have not addresses")
+			}
 		}
 	}
 
@@ -411,6 +435,78 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 	}
 
 	for _, addr := range sumAddresses {
+
+		//判断主币余额是否够手续费
+		if sumRawTx.Coin.IsContract {
+
+			b, err := decoder.wm.WalletClient.Wallet.GetBalance(addr.Address)
+			if err != nil {
+				continue
+			}
+			coinBalance := decimal.New(int64(b), decoder.wm.Decimal())
+
+			//主币余额不足
+			if coinBalance.Cmp(fixFees) < 0 {
+
+				//有手续费账户支持
+				if feesSupportAccount != nil {
+
+					//通过手续费账户创建交易单
+					supportAddress := addr.Address
+					supportAmount := decimal.Zero
+					feesSupportScale, _ := decimal.NewFromString(sumRawTx.FeesSupportAccount.FeesSupportScale)
+					fixSupportAmount, _ := decimal.NewFromString(sumRawTx.FeesSupportAccount.FixSupportAmount)
+
+					//优先采用固定支持数量
+					if fixSupportAmount.GreaterThan(decimal.Zero) {
+						supportAmount = fixSupportAmount
+					} else {
+						//没有固定支持数量，有手续费倍率，计算支持数量
+						if feesSupportScale.GreaterThan(decimal.Zero) {
+							supportAmount = feesSupportScale.Mul(fixFees)
+						} else {
+							//默认支持数量为手续费
+							supportAmount = fixFees
+						}
+					}
+
+					decoder.wm.Log.Debugf("create transaction for fees support account")
+					decoder.wm.Log.Debugf("fees account: %s", feesSupportAccount.AccountID)
+					decoder.wm.Log.Debugf("mini support amount: %s", fixFees.String())
+					decoder.wm.Log.Debugf("allow support amount: %s", supportAmount.String())
+					decoder.wm.Log.Debugf("support address: %s", supportAddress)
+
+					supportCoin := openwallet.Coin{
+						Symbol:     sumRawTx.Coin.Symbol,
+						IsContract: false,
+					}
+
+					//创建一笔交易单
+					rawTx := &openwallet.RawTransaction{
+						Coin:    supportCoin,
+						Account: feesSupportAccount,
+						To: map[string]string{
+							addr.Address: supportAmount.String(),
+						},
+						Required: 1,
+					}
+
+					from := feesAddresses[0]
+
+					createTxErr := decoder.createNSGRawTransaction(wrapper, rawTx, from, addr.Address, supportAmount.Shift(decoder.wm.Decimal()), supportAmount.String(), fixFees.Shift(-decoder.wm.Decimal()))
+					rawTxWithErr := &openwallet.RawTransactionWithError{
+						RawTx: rawTx,
+						Error: openwallet.ConvertError(createTxErr),
+					}
+
+					//创建成功，添加到队列
+					rawTxArray = append(rawTxArray, rawTxWithErr)
+
+					//汇总下一个
+					continue
+				}
+			}
+		}
 
 		sumAmount, _ := decimal.NewFromString(addr.Balance)
 
