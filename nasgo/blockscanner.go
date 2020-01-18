@@ -395,19 +395,19 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 	}
 
 	if trx.Type == 14 {
-		if trx.Asset == nil {
+		if trx.Asset == nil || trx.Asset.UiaTransfer == nil {
 			bs.wm.Log.Std.Debug("transaction asset info missing: [%v] ", trx.ID)
 			return
 		}
-		token := trx.Asset.Currency
+		token := trx.Asset.UiaTransfer.Currency
 		contractID := openwallet.GenContractID(bs.wm.Symbol(), token)
 		coin.Contract = openwallet.SmartContract{
 			Symbol:     bs.wm.Symbol(),
 			ContractID: contractID,
 			Address:    token,
-			Decimals:   uint64(trx.Asset.Precision),
+			Decimals:   uint64(trx.Asset.UiaTransfer.Precision),
 		}
-		amount = trx.Asset.Amount
+		amount = trx.Asset.UiaTransfer.Amount
 	}
 
 	transx := &openwallet.Transaction{
