@@ -426,7 +426,7 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 				TxType:      0,
 			}
 
-			wxID := openwallet.GenTransactionWxID2(trx.ID, bs.wm.Symbol(), "")
+			wxID := openwallet.GenTransactionWxID(feeTransx)
 			feeTransx.WxID = wxID
 			feeExtractData.Transaction = feeTransx
 			bs.extractTxInput(trx, txExtractData)
