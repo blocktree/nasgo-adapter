@@ -405,6 +405,7 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 			Address:    token,
 			Decimals:   uint64(trx.Asset.UiaTransfer.Precision),
 		}
+		coin.ContractID = contractID
 		amount = trx.Asset.UiaTransfer.Amount
 
 		if optType == 0 || optType == 1 {
