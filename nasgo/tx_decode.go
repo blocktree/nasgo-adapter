@@ -393,11 +393,12 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 			feesSupportAccount = account
 
 			//获取手续费支持账户的地址nonce
-			feesAddresses, feesSupportErr := wrapper.GetAddressList(0, 1,
+			getFeesAddresses, feesSupportErr := wrapper.GetAddressList(0, 1,
 				"AccountID", feesSupportAccount.AccountID)
 			if feesSupportErr != nil {
 				return nil, openwallet.NewError(openwallet.ErrAddressNotFound, "fees support account have not addresses")
 			}
+			feesAddresses = getFeesAddresses
 
 			if len(feesAddresses) == 0 {
 				return nil, openwallet.Errorf(openwallet.ErrAccountNotAddress, "fees support account have not addresses")
