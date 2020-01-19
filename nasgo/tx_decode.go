@@ -493,6 +493,10 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 						Required: 1,
 					}
 
+					if len(feesAddresses) == 0 {
+						decoder.wm.Log.Debugf("feesAddresses is empty")
+						continue
+					}
 					from := feesAddresses[0]
 
 					createTxErr := decoder.createNSGRawTransaction(wrapper, rawTx, from, addr.Address, supportAmount.Shift(decoder.wm.Decimal()), supportAmount.String(), fixFees.Shift(-decoder.wm.Decimal()))
