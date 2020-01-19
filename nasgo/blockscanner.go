@@ -405,20 +405,21 @@ func (bs *BlockScanner) InitExtractResult(sourceKey string, trx *rpc.Transaction
 			Address:    token,
 			Decimals:   uint64(trx.Asset.UiaTransfer.Precision),
 		}
+		coin.ContractID = contractID
 		amount = trx.Asset.UiaTransfer.Amount
 
 		if optType == 0 || optType == 1 {
 
 			mainAmount := decimal.New(int64(trx.Amount), -bs.wm.Decimal()).String()
 			mainCoin := openwallet.Coin{
-				IsContract:false,
-				Symbol:bs.wm.Symbol(),
+				IsContract: false,
+				Symbol:     bs.wm.Symbol(),
 			}
 
 			fees := decimal.New(int64(trx.Fee), -bs.wm.Decimal()).String()
 			feeExtractData := &openwallet.TxExtractData{}
 			feeTransx := &openwallet.Transaction{
-				Coin: mainCoin,
+				Coin:        mainCoin,
 				Fees:        fees,
 				BlockHash:   result.BlockHash,
 				BlockHeight: result.BlockHeight,
