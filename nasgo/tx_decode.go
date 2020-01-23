@@ -376,7 +376,15 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 		// 代币转账
 
 		for _, address := range searchAddrs {
-			balance, _ := decoder.wm.WalletClient.Wallet.GetAssetsBalance(address, sumRawTx.Coin.Contract.Address)
+			balance, balanceERR := decoder.wm.WalletClient.Wallet.GetAssetsBalance(address, sumRawTx.Coin.Contract.Address)
+			if balanceERR != nil {
+				decoder.wm.Log.Notice("GetAssetsBalance Error: [%+v], %+v", address, balanceERR)
+				continue
+			}
+			if balance == nil {
+				decoder.wm.Log.Notice("Address asset balance is nil: [%+v]", address)
+				continue
+			}
 			addrBalanceArray = append(addrBalanceArray, &openwallet.Balance{
 				Address: address,
 				Balance: balance.Balance,
@@ -393,11 +401,12 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 			feesSupportAccount = account
 
 			//获取手续费支持账户的地址nonce
-			feesAddresses, feesSupportErr := wrapper.GetAddressList(0, 1,
+			getFeesAddresses, feesSupportErr := wrapper.GetAddressList(0, 1,
 				"AccountID", feesSupportAccount.AccountID)
 			if feesSupportErr != nil {
 				return nil, openwallet.NewError(openwallet.ErrAddressNotFound, "fees support account have not addresses")
 			}
+			feesAddresses = getFeesAddresses
 
 			if len(feesAddresses) == 0 {
 				return nil, openwallet.Errorf(openwallet.ErrAccountNotAddress, "fees support account have not addresses")
