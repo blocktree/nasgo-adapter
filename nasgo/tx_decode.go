@@ -376,7 +376,15 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 		// 代币转账
 
 		for _, address := range searchAddrs {
-			balance, _ := decoder.wm.WalletClient.Wallet.GetAssetsBalance(address, sumRawTx.Coin.Contract.Address)
+			balance, balanceERR := decoder.wm.WalletClient.Wallet.GetAssetsBalance(address, sumRawTx.Coin.Contract.Address)
+			if balanceERR != nil {
+				decoder.wm.Log.Notice("GetAssetsBalance Error: [%+v], %+v", address, balanceERR)
+				continue
+			}
+			if balanceERR == nil {
+				decoder.wm.Log.Notice("Address asset balance is nil: [%+v]", address)
+				continue
+			}
 			addrBalanceArray = append(addrBalanceArray, &openwallet.Balance{
 				Address: address,
 				Balance: balance.Balance,
