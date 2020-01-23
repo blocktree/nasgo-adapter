@@ -159,13 +159,13 @@ func (tx *Tx) BroadcastTx(txData interface{}, try int64) error {
 		if err != nil {
 			return errors.New(err)
 		}
-		log.Std.Info("%+v", r)
-		log.Debugf("response: %s", r.String())
+		//log.Std.Info("%+v", r)
+		//log.Debugf("response: %s", r.String())
 		resp := gjson.ParseBytes(r.Bytes())
 		if !resp.Get("error").Exists() {
 			return nil
 		}
-		log.Std.Info("%+v", resp.Get("error").String())
+		//log.Std.Info("%+v", resp.Get("error").String())
 		time.Sleep(1 * time.Second)
 	}
 	return err

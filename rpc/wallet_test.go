@@ -23,7 +23,7 @@ func TestWallet_GetBalance(t *testing.T) {
 			name:   "test balance",
 			fields: fields{baseAddress: Url},
 			args: args{
-				address: "N6R2Gq5ZsXuMcXYcZo1bQ9WQRnaT9Ba3Ha",
+				address: "NC3VtNUNv2FR15yjrK5jhpbzLrY37LpaBg",
 			},
 			want:    17200000,
 			wantErr: false,
