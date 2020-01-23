@@ -128,17 +128,11 @@ func TestTransfer(t *testing.T) {
 	//WMGcsvAwjjBj587oGE2GCZ3gu7F942hwGK
 	//EhXYgY4wFN91VzkmJtyXPa1mPwEcp7o7PokQqaKcKGE4
 	// to := "N2MzN3J9ZhHiWdmKxGSCxbwRHgWN7FzPC3"
-	to := "NGUdbPy5WkerRcqkMUneq7R4U5LZ4HvnEi"
+	to := "NLYuCnWxigWcjJbmcwH6oKqH6zGGaoD9cc"
 	testGetAssetsAccountBalance(tm, walletID, accountID)
 
 	// rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "10", "", nil)
-	rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "100", "", &openwallet.SmartContract{
-		Address:  "IMM.IMM",
-		Symbol:   "NSG",
-		Name:     "IMMT",
-		Token:    "IMMT",
-		Decimals: 5,
-	})
+	rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "0.1", "", nil)
 	if err != nil {
 		return
 	}
@@ -160,25 +154,129 @@ func TestTransfer(t *testing.T) {
 
 }
 
+func TestTransfer_Token(t *testing.T) {
+
+	addrs := []string{
+		"N2MzN3J9ZhHiWdmKxGSCxbwRHgWN7FzPC3",
+		"N4yAAjaTpW4Dc1c9Jd3k8tpJE2Q3ydQr4F",
+		"NC3VtNUNv2FR15yjrK5jhpbzLrY37LpaBg",
+		"NENz4Y4cMMnnAtsDmBneetMEupqZk4PGPt",
+		"NH9MCEEM1idr5JGVkPioEMXnQiCMwHHg1K",
+		"NJMrRD6BgfPTcJE8G7a5LKc4YMXEc5ARDa",
+	}
+
+	tm := testInitWalletManager()
+	walletID := "W2DyYXbPCpkXWS1tJPYcRxhioSNyqwSu8F"
+	accountID := "9YBe43SkTyBneYNEnR7tHB3dh7VPB7toYkaZzU869C9y"
+
+	contract := openwallet.SmartContract{
+		Address:  "IMM.IMM",
+		Symbol:   "NSG",
+		Name:     "IMMT",
+		Token:    "IMMT",
+		Decimals: 5,
+	}
+
+	testGetAssetsAccountBalance(tm, walletID, accountID)
+	testGetAssetsAccountTokenBalance(tm, walletID, accountID, contract)
+
+	for _, to := range addrs {
+		// rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "10", "", nil)
+		rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "5", "", &contract)
+		if err != nil {
+			return
+		}
+
+		_, err = testSignTransactionStep(tm, rawTx)
+		if err != nil {
+			return
+		}
+
+		_, err = testVerifyTransactionStep(tm, rawTx)
+		if err != nil {
+			return
+		}
+
+		_, err = testSubmitTransactionStep(tm, rawTx)
+		if err != nil {
+			return
+		}
+	}
+}
+
 func TestSummary(t *testing.T) {
 	tm := testInitWalletManager()
 	walletID := "WMGcsvAwjjBj587oGE2GCZ3gu7F942hwGK"
 	accountID := "EhXYgY4wFN91VzkmJtyXPa1mPwEcp7o7PokQqaKcKGE4"
-	summaryAddress := "NDt9qnAHnFAuP8T9GbzQ2o8UaacQscAcU2"
+	summaryAddress := "N6E3HkfTUCpUA6F4RoDCEsNXzQ65HxJz3A"
 
 	testGetAssetsAccountBalance(tm, walletID, accountID)
 
-	// contract := &openwallet.SmartContract{
-	// 	Address:  "IMM.IMM",
-	// 	Symbol:   "NSG",
-	// 	Name:     "IMMT",
-	// 	Token:    "IMMT",
-	// 	Decimals: 5,
-	// }
+	feesSupport := &openwallet.FeesSupportAccount{
+		AccountID:        "47VD3c4xUuvCu1cuaQffRMcgQdkkAtYovUwwiMNFpKNe", //NLYuCnWxigWcjJbmcwH6oKqH6zGGaoD9cc
+		FeesSupportScale: "3",
+	}
 
 	rawTxArray, err := testCreateSummaryTransactionStep(tm, walletID, accountID,
 		summaryAddress, "", "", "",
-		0, 100, nil, nil)
+		0, 100, nil, feesSupport)
+	// 0, 100, contract, nil)
+	if err != nil {
+		log.Errorf("CreateSummaryTransaction failed, unexpected error: %v", err)
+		return
+	}
+
+	//执行汇总交易
+	for _, rawTxWithErr := range rawTxArray {
+
+		if rawTxWithErr.Error != nil {
+			log.Error(rawTxWithErr.Error.Error())
+			continue
+		}
+
+		_, err = testSignTransactionStep(tm, rawTxWithErr.RawTx)
+		if err != nil {
+			return
+		}
+
+		_, err = testVerifyTransactionStep(tm, rawTxWithErr.RawTx)
+		if err != nil {
+			return
+		}
+
+		_, err = testSubmitTransactionStep(tm, rawTxWithErr.RawTx)
+		if err != nil {
+			return
+		}
+	}
+
+}
+
+func TestSummary_Token(t *testing.T) {
+	tm := testInitWalletManager()
+	walletID := "WMGcsvAwjjBj587oGE2GCZ3gu7F942hwGK"
+	accountID := "EhXYgY4wFN91VzkmJtyXPa1mPwEcp7o7PokQqaKcKGE4"
+	summaryAddress := "N6E3HkfTUCpUA6F4RoDCEsNXzQ65HxJz3A"
+
+	contract := openwallet.SmartContract{
+		Address:  "IMM.IMM",
+		Symbol:   "NSG",
+		Name:     "IMMT",
+		Token:    "IMMT",
+		Decimals: 5,
+	}
+
+	testGetAssetsAccountBalance(tm, walletID, accountID)
+	testGetAssetsAccountTokenBalance(tm, walletID, accountID, contract)
+
+	feesSupport := &openwallet.FeesSupportAccount{
+		AccountID:        "47VD3c4xUuvCu1cuaQffRMcgQdkkAtYovUwwiMNFpKNe", //NLYuCnWxigWcjJbmcwH6oKqH6zGGaoD9cc
+		FeesSupportScale: "5",
+	}
+
+	rawTxArray, err := testCreateSummaryTransactionStep(tm, walletID, accountID,
+		summaryAddress, "1", "0", "",
+		0, 100, &contract, feesSupport)
 	// 0, 100, contract, nil)
 	if err != nil {
 		log.Errorf("CreateSummaryTransaction failed, unexpected error: %v", err)

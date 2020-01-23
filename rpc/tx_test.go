@@ -24,7 +24,7 @@ func TestTx_GetTransaction(t *testing.T) {
 			name:   "test get tx",
 			fields: fields{baseAddress: Url},
 			args: args{
-				id: "e94bc52c095d7321fe7dca50c42ab3b4337bd06af3a80d958b0d7dcbade5c526",
+				id: "51db69b4a4917dae6a230925777b4591ccd67c4bab367afcd9ef041c9183c72e",
 			},
 			wantErr: false,
 		},

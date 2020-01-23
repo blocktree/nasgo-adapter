@@ -1,6 +1,7 @@
 package openwtester
 
 import (
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -77,7 +78,7 @@ func TestWalletManager_CreateAssetsAccount(t *testing.T) {
 	tm := testInitWalletManager()
 
 	walletID := "W2DyYXbPCpkXWS1tJPYcRxhioSNyqwSu8F"
-	account := &openwallet.AssetsAccount{Alias: "mainnetNSG", WalletID: walletID, Required: 1, Symbol: "NSG", IsTrust: true}
+	account := &openwallet.AssetsAccount{Alias: "fee support NSG", WalletID: walletID, Required: 1, Symbol: "NSG", IsTrust: true}
 	account, address, err := tm.CreateAssetsAccount(testApp, walletID, "12345678", account, nil)
 	if err != nil {
 		log.Error(err)
@@ -114,8 +115,9 @@ func TestWalletManager_CreateAddress(t *testing.T) {
 	tm := testInitWalletManager()
 
 	walletID := "W2DyYXbPCpkXWS1tJPYcRxhioSNyqwSu8F"
-	accountID := "9YBe43SkTyBneYNEnR7tHB3dh7VPB7toYkaZzU869C9y"
-	address, err := tm.CreateAddress(testApp, walletID, accountID, 1)
+	//accountID := "9YBe43SkTyBneYNEnR7tHB3dh7VPB7toYkaZzU869C9y"
+	accountID := "EhXYgY4wFN91VzkmJtyXPa1mPwEcp7o7PokQqaKcKGE4"
+	address, err := tm.CreateAddress(testApp, walletID, accountID, 5)
 	if err != nil {
 		log.Error(err)
 		return
@@ -133,14 +135,16 @@ func TestWalletManager_GetAddressList(t *testing.T) {
 	tm := testInitWalletManager()
 
 	walletID := "W2DyYXbPCpkXWS1tJPYcRxhioSNyqwSu8F"
-	accountID := "9YBe43SkTyBneYNEnR7tHB3dh7VPB7toYkaZzU869C9y"
+	//accountID := "9YBe43SkTyBneYNEnR7tHB3dh7VPB7toYkaZzU869C9y"
+	accountID := "EhXYgY4wFN91VzkmJtyXPa1mPwEcp7o7PokQqaKcKGE4"
+	//accountID := "47VD3c4xUuvCu1cuaQffRMcgQdkkAtYovUwwiMNFpKNe"
 	list, err := tm.GetAddressList(testApp, walletID, accountID, 0, -1, false)
 	if err != nil {
 		log.Error("unexpected error:", err)
 		return
 	}
-	for i, w := range list {
-		log.Info("address[", i, "] :", w.Address)
+	for _, w := range list {
+		fmt.Println(w.Address)
 	}
 	log.Info("address count:", len(list))
 
