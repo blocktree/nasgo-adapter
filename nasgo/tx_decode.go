@@ -381,7 +381,7 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 				decoder.wm.Log.Notice("GetAssetsBalance Error: [%+v], %+v", address, balanceERR)
 				continue
 			}
-			if balanceERR == nil {
+			if balance == nil {
 				decoder.wm.Log.Notice("Address asset balance is nil: [%+v]", address)
 				continue
 			}
