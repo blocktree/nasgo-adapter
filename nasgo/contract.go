@@ -16,7 +16,7 @@
 package nasgo
 
 import (
-	"github.com/blocktree/openwallet/openwallet"
+	"github.com/blocktree/openwallet/v2/openwallet"
 	"github.com/shopspring/decimal"
 )
 
@@ -45,25 +45,38 @@ func (decoder *ContractDecoder) GetTokenBalanceByAddress(contract openwallet.Sma
 		}
 
 		if balance == nil {
-			return nil, err
+			tokenBalance := &openwallet.TokenBalance{
+				Contract: &contract,
+				Balance: &openwallet.Balance{
+					Address:          addr,
+					Symbol:           contract.Symbol,
+					Balance:          "0",
+					ConfirmBalance:   "0",
+					UnconfirmBalance: "0",
+				},
+			}
+
+			tokenBalanceList = append(tokenBalanceList, tokenBalance)
+
+		} else {
+			value, _ := decimal.NewFromString(balance.Balance)
+			value = value.Shift(-int32(contract.Decimals))
+			// value = value.Shift(-int32(balance.Precision))
+
+			tokenBalance := &openwallet.TokenBalance{
+				Contract: &contract,
+				Balance: &openwallet.Balance{
+					Address:          addr,
+					Symbol:           contract.Symbol,
+					Balance:          value.String(),
+					ConfirmBalance:   value.String(),
+					UnconfirmBalance: "0",
+				},
+			}
+
+			tokenBalanceList = append(tokenBalanceList, tokenBalance)
 		}
 
-		value, _ := decimal.NewFromString(balance.Balance)
-		value = value.Shift(-int32(contract.Decimals))
-		// value = value.Shift(-int32(balance.Precision))
-
-		tokenBalance := &openwallet.TokenBalance{
-			Contract: &contract,
-			Balance: &openwallet.Balance{
-				Address:          addr,
-				Symbol:           contract.Symbol,
-				Balance:          value.String(),
-				ConfirmBalance:   value.String(),
-				UnconfirmBalance: "0",
-			},
-		}
-
-		tokenBalanceList = append(tokenBalanceList, tokenBalance)
 	}
 
 	return tokenBalanceList, nil

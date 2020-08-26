@@ -3,7 +3,7 @@ package txsigner
 import (
 	"encoding/hex"
 	"github.com/blocktree/go-owcrypt"
-	"github.com/blocktree/openwallet/log"
+	"github.com/blocktree/openwallet/v2/log"
 	"reflect"
 	"testing"
 
@@ -63,4 +63,3 @@ func TestVerify(t *testing.T) {
 	}
 
 }
-

@@ -17,7 +17,7 @@ package nasgo
 
 import (
 	"github.com/blocktree/nasgo-adapter/rpc"
-	"github.com/blocktree/openwallet/openwallet"
+	"github.com/blocktree/openwallet/v2/openwallet"
 )
 
 type Block struct {

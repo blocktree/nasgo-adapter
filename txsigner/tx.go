@@ -7,7 +7,7 @@ import (
 	"github.com/blocktree/go-owcrypt"
 	"github.com/blocktree/nasgo-adapter/rpc"
 	"github.com/blocktree/nasgo-adapter/utils"
-	"github.com/blocktree/openwallet/log"
+	"github.com/blocktree/openwallet/v2/log"
 )
 
 type Transaction struct {

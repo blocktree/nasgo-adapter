@@ -16,7 +16,10 @@
 package nasgo
 
 import (
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openwallet"
 	"path/filepath"
+	"testing"
 
 	"github.com/astaxie/beego/config"
 )
@@ -34,7 +37,7 @@ func testNewWalletManager() *WalletManager {
 	wm := NewWalletManager()
 
 	//读取配置
-	absFile := filepath.Join("conf", "conf.ini")
+	absFile := filepath.Join("conf", "NSG.ini")
 	//log.Debug("absFile:", absFile)
 	c, err := config.NewConfig("ini", absFile)
 	if err != nil {
@@ -42,4 +45,25 @@ func testNewWalletManager() *WalletManager {
 	}
 	wm.LoadAssetsConfig(c)
 	return wm
+}
+
+func TestContractDecoder_GetTokenBalanceByAddress(t *testing.T) {
+	contract := openwallet.SmartContract{
+		ContractID: "",
+		Symbol:     "NSG",
+		Address:    "IMM.IMM",
+		Token:      "IMMT",
+		Protocol:   "",
+		Name:       "IMMT",
+		Decimals:   0,
+	}
+	addr := "NP2YbwgZHCY9tEnUVcfUmQmzUCun2wJ17F"
+	tokens, err := tw.ContractDecoder.GetTokenBalanceByAddress(contract, addr)
+	if err != nil {
+		t.Errorf("GetTokenBalanceByAddress failed, err: %v", err)
+		return
+	}
+	for _, t := range tokens {
+		log.Infof("token: %+v", t.Balance)
+	}
 }

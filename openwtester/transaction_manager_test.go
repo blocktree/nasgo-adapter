@@ -20,10 +20,10 @@ import (
 	"testing"
 
 	"github.com/astaxie/beego/config"
-	"github.com/blocktree/openwallet/openw"
+	"github.com/blocktree/openwallet/v2/openw"
 
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/openwallet"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openwallet"
 )
 
 func TestWalletManager_GetTransactions(t *testing.T) {
@@ -106,8 +106,8 @@ func TestWalletManager_GetTransactionByWxID(t *testing.T) {
 func TestWalletManager_GetAssetsAccountBalance(t *testing.T) {
 	tm := testInitWalletManager()
 	walletID := "W2DyYXbPCpkXWS1tJPYcRxhioSNyqwSu8F"
-	//accountID := "9YBe43SkTyBneYNEnR7tHB3dh7VPB7toYkaZzU869C9y"
-	accountID := "EhXYgY4wFN91VzkmJtyXPa1mPwEcp7o7PokQqaKcKGE4"
+	accountID := "9YBe43SkTyBneYNEnR7tHB3dh7VPB7toYkaZzU869C9y"
+	//accountID := "EhXYgY4wFN91VzkmJtyXPa1mPwEcp7o7PokQqaKcKGE4"
 	//accountID := "47VD3c4xUuvCu1cuaQffRMcgQdkkAtYovUwwiMNFpKNe"
 
 	balance, err := tm.GetAssetsAccountBalance(testApp, walletID, accountID)
@@ -117,7 +117,6 @@ func TestWalletManager_GetAssetsAccountBalance(t *testing.T) {
 	}
 	log.Info("balance:", balance)
 }
-
 
 func TestWalletManager_GetAssetsAccountTokenBalance(t *testing.T) {
 	tm := testInitWalletManager()

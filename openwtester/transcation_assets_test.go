@@ -18,10 +18,10 @@ package openwtester
 import (
 	"testing"
 
-	"github.com/blocktree/openwallet/openw"
+	"github.com/blocktree/openwallet/v2/openw"
 
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/openwallet"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openwallet"
 )
 
 func testGetAssetsAccountBalance(tm *openw.WalletManager, walletID, accountID string) {
@@ -50,7 +50,7 @@ func testCreateTransactionStep(tm *openw.WalletManager, walletID, accountID, to,
 	//	return nil, err
 	//}
 
-	rawTx, err := tm.CreateTransaction(testApp, walletID, accountID, amount, to, feeRate, "", contract)
+	rawTx, err := tm.CreateTransaction(testApp, walletID, accountID, amount, to, feeRate, "", contract, nil)
 
 	if err != nil {
 		log.Error("CreateTransaction failed, unexpected error:", err)
@@ -128,7 +128,7 @@ func TestTransfer(t *testing.T) {
 	//WMGcsvAwjjBj587oGE2GCZ3gu7F942hwGK
 	//EhXYgY4wFN91VzkmJtyXPa1mPwEcp7o7PokQqaKcKGE4
 	// to := "N2MzN3J9ZhHiWdmKxGSCxbwRHgWN7FzPC3"
-	to := "NLYuCnWxigWcjJbmcwH6oKqH6zGGaoD9cc"
+	to := "NNd5jNQQ7E4p1s3QnUGgDTyZRaSb5asVkT"
 	testGetAssetsAccountBalance(tm, walletID, accountID)
 
 	// rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "10", "", nil)
@@ -158,11 +158,13 @@ func TestTransfer_Token(t *testing.T) {
 
 	addrs := []string{
 		"N2MzN3J9ZhHiWdmKxGSCxbwRHgWN7FzPC3",
-		"N4yAAjaTpW4Dc1c9Jd3k8tpJE2Q3ydQr4F",
-		"NC3VtNUNv2FR15yjrK5jhpbzLrY37LpaBg",
-		"NENz4Y4cMMnnAtsDmBneetMEupqZk4PGPt",
-		"NH9MCEEM1idr5JGVkPioEMXnQiCMwHHg1K",
-		"NJMrRD6BgfPTcJE8G7a5LKc4YMXEc5ARDa",
+		//"N4yAAjaTpW4Dc1c9Jd3k8tpJE2Q3ydQr4F",
+		//"NC3VtNUNv2FR15yjrK5jhpbzLrY37LpaBg",
+		//"NENz4Y4cMMnnAtsDmBneetMEupqZk4PGPt",
+		//"NH9MCEEM1idr5JGVkPioEMXnQiCMwHHg1K",
+		//"NJMrRD6BgfPTcJE8G7a5LKc4YMXEc5ARDa",
+
+		//"NGJsqQJ9y8AMjGqXXZfLsS2NJdpMke3v6",
 	}
 
 	tm := testInitWalletManager()
@@ -182,7 +184,7 @@ func TestTransfer_Token(t *testing.T) {
 
 	for _, to := range addrs {
 		// rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "10", "", nil)
-		rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "5", "", &contract)
+		rawTx, err := testCreateTransactionStep(tm, walletID, accountID, to, "0.1", "", &contract)
 		if err != nil {
 			return
 		}

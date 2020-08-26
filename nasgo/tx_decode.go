@@ -25,7 +25,7 @@ import (
 	"github.com/blocktree/nasgo-adapter/rpc"
 	"github.com/blocktree/nasgo-adapter/txsigner"
 	"github.com/blocktree/nasgo-adapter/utils"
-	"github.com/blocktree/openwallet/openwallet"
+	"github.com/blocktree/openwallet/v2/openwallet"
 	"github.com/shopspring/decimal"
 )
 
@@ -453,7 +453,6 @@ func (decoder *TransactionDecoder) CreateNSGSummaryRawTransaction(wrapper openwa
 			return nil, openwallet.Errorf(openwallet.ErrAccountNotAddress, "fees support account have not config")
 		}
 	}
-
 
 	if len(sumAddresses) == 0 {
 		return nil, nil

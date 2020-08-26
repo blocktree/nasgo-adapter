@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-const Url = "http://localhost:20001"
+const Url = "http://"
 
 func TestBlock_GetByHeight(t *testing.T) {
 	type fields struct {

@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/openw"
-	"github.com/blocktree/openwallet/openwallet"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openw"
+	"github.com/blocktree/openwallet/v2/openwallet"
 )
 
 var (
@@ -117,7 +117,7 @@ func TestWalletManager_CreateAddress(t *testing.T) {
 	walletID := "W2DyYXbPCpkXWS1tJPYcRxhioSNyqwSu8F"
 	//accountID := "9YBe43SkTyBneYNEnR7tHB3dh7VPB7toYkaZzU869C9y"
 	accountID := "EhXYgY4wFN91VzkmJtyXPa1mPwEcp7o7PokQqaKcKGE4"
-	address, err := tm.CreateAddress(testApp, walletID, accountID, 5)
+	address, err := tm.CreateAddress(testApp, walletID, accountID, 200)
 	if err != nil {
 		log.Error(err)
 		return

@@ -2,6 +2,7 @@ package rpc
 
 import (
 	"encoding/json"
+	"github.com/blocktree/openwallet/v2/log"
 	"reflect"
 	"testing"
 )
@@ -62,7 +63,7 @@ func TestTx_GetTransactions(t *testing.T) {
 			name:   "test get txs",
 			fields: fields{baseAddress: Url},
 			args: args{
-				blockId: "ab2eb41872f70d8da38514110f6d24a12b7c4115401ba86be1b9a0c5c002c039",
+				blockId: "b0938069b59f336482220a0128bf8b4874ed49792b354a2e74bafcd759a1bd15",
 			},
 			wantErr: false,
 		},
@@ -75,8 +76,8 @@ func TestTx_GetTransactions(t *testing.T) {
 				t.Errorf("Tx.GetTransactionsByBlock() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Tx.GetTransactionsByBlock() = %v, want %v", got, tt.want)
+			for _, tx := range got {
+				log.Infof("tx: %+v", tx)
 			}
 		})
 	}

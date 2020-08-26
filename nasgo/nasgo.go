@@ -18,8 +18,8 @@ package nasgo
 import (
 	"github.com/astaxie/beego/config"
 	"github.com/blocktree/nasgo-adapter/rpc"
-	"github.com/blocktree/openwallet/log"
-	"github.com/blocktree/openwallet/openwallet"
+	"github.com/blocktree/openwallet/v2/log"
+	"github.com/blocktree/openwallet/v2/openwallet"
 )
 
 //CurveType 曲线类型
